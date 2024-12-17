@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Confirmation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        h1 {
+            color: green;
+        }
+        p {
+            margin: 20px 0;
+            color: #555;
+            line-height: 1.6;
+        }
+        a {
+            text-decoration: none;
+            color: white;
+            background-color: #F57224;
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        a:hover {
+            background-color: #c44e0b;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <h1>{{message}}</h1>
+        <p>
+            Thank you for your purchase! Your payment has been successfully processed.  
+            We appreciate your trust in us and hope you enjoy your new product.  
+            Please consider leaving a review to share your experience with others.
+        </p>
+        
+        <!-- Navigate to Review Page -->
+        <a href="http://localhost:3000">Go Home</a>
+    </div>
+</body>
+</html>

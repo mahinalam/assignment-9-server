@@ -1,0 +1,173 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id          String     @id @default(uuid())
+  name        String
+  email       String     @unique
+  password    String
+  role        UserRole
+  phoneNumber String?
+  address     String?
+  status      UserStatus @default(ACTIVE)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  isDeleted   Boolean    @default(false)
+
+  shop   Shop?
+  order  Order[]
+  review Review[]
+
+  @@map("users")
+}
+
+model Shop {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  address     String
+  logo        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  isDeleted   Boolean  @default(false)
+
+  ownerId  String    @unique
+  owner    User      @relation(fields: [ownerId], references: [id])
+  products Product[]
+}
+
+model Category {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  image     String
+  isDeleted Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  product   Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  newPrice    Int
+  oldPrice    Int
+  stock       Int
+  isFlash     Boolean  @default(false)
+  images      String[] @default([])
+  disCounts   Int      @default(0)
+  isDeleted   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  shop        Shop?    @relation(fields: [shopId], references: [id])
+  shopId      String?
+
+  categoryId String
+  category   Category    @relation(fields: [categoryId], references: [id])
+  orderItem  OrderItem[]
+  review     Review[]
+
+  @@map("products")
+}
+
+model Order {
+  id              String        @id @default(uuid())
+  status          OrderStatus   @default(PENDING)
+  totalPrice      Float
+  shippingAddress String
+  transactionId   String        @unique
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  isDeleted       Boolean       @default(false)
+  userId          String
+  user            User          @relation(fields: [userId], references: [id])
+  orderItems      OrderItem[]
+  payment         Payment?
+  paymentStatus   PaymentStatus @default(PENDING)
+}
+
+model OrderItem {
+  id        String   @id @default(uuid())
+  quantity  Int
+  price     Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
+
+  productId String
+
+  product Product @relation(fields: [productId], references: [id])
+  orderId String
+  order   Order   @relation(fields: [orderId], references: [id])
+}
+
+model Payment {
+  id            String        @id @default(uuid())
+  amount        Float
+  method        PaymentMethod @default(CASH_ON_DELIVERY)
+  status        PaymentStatus @default(PENDING)
+  transactionId String?       @unique
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  isDeleted     Boolean       @default(false)
+
+  orderId String @unique
+  order   Order  @relation(fields: [orderId], references: [id])
+
+  @@map("payments")
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  rating    Int
+  comment   String?
+  images    String[] @default([])
+  createdAt DateTime @default(now())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  isDeleted Boolean  @default(false)
+}
+
+enum UserRole {
+  ADMIN
+  VENDOR
+  USER
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+  DELETED
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELED
+}
+
+enum PaymentMethod {
+  CREDIT_CARD
+  DEBIT_CARD
+  BKASH
+  CASH_ON_DELIVERY
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
