@@ -14,11 +14,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const app_1 = __importDefault(require("./app"));
 const config_1 = __importDefault(require("./config"));
+const seed_1 = require("./utils/seed");
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         const server = app_1.default.listen(config_1.default.port, () => {
             console.log("Sever is running on port ", config_1.default.port);
         });
+        yield (0, seed_1.seed)();
         const exitHandler = () => {
             if (server) {
                 server.close(() => {
@@ -27,15 +29,14 @@ function main() {
             }
             process.exit(1);
         };
-        process.on('uncaughtException', (error) => {
+        process.on("uncaughtException", (error) => {
             console.log(error);
             exitHandler();
         });
-        process.on('unhandledRejection', (error) => {
+        process.on("unhandledRejection", (error) => {
             console.log(error);
             exitHandler();
         });
     });
 }
-;
 main();

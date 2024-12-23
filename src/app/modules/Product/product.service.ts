@@ -74,6 +74,25 @@ import prisma from "../../../sharred/prisma";
 //   return result;
 // };
 
+// /** @type {import('tailwindcss').Config} */
+// module.exports = {
+//   content: [
+//     './components/**/*.{js,ts,jsx,tsx,mdx}',
+//     './app/**/*.{js,ts,jsx,tsx,mdx}',
+//     './node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}'
+//   ],
+//   theme: {
+//     extend: {
+//       fontFamily: {
+//         sans: ["var(--font-sans)"],
+//         mono: ["var(--font-mono)"],
+//       },
+//     },
+//   },
+//   darkMode: "class",
+//   plugins: [require('@nextui-org/theme')], // Use 'require' to properly add the plugin
+// }
+
 const getAllProductsFromDB = async (params: {
   searchTerms?: string[]; // searchTerms is now an array of strings
   sortBy?: "name" | "newPrice";
@@ -127,14 +146,15 @@ const createProductIntoDB = async (payload: Product, images: TImageFiles) => {
 };
 
 // get all vendor shop products
-const getVendorShopProductsFromDB = async (ownerId: string) => {
+const getVendorShopProductsFromDB = async (shopId: string) => {
   const result = await prisma.shop.findUniqueOrThrow({
     where: {
-      ownerId,
+      id: shopId,
       isDeleted: false,
     },
     include: {
       products: true,
+      followingShop: true,
     },
     // select: {
     //   id: true,

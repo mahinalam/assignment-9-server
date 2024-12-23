@@ -8,6 +8,7 @@ import { ReviewRoute } from "../modules/Review/review.route";
 import { OrderRoute } from "../modules/Order/order.route";
 import { OrderItemRoute } from "../modules/OrderItem/orderItem.route";
 import { PaymentRoute } from "../modules/Payment/payment.route";
+import { FollowingShopRoute } from "../modules/FollowingShop/followingShop.route";
 // import { userRoutes } from "../modules/User/user.routes";
 // import { AdminRoutes } from "../modules/Admin/admin.routes";
 // import { AuthRoutes } from "../modules/Auth/auth.routes";
@@ -60,6 +61,10 @@ const moduleRoutes = [
   {
     path: "/payment",
     route: PaymentRoute,
+  },
+  {
+    path: "/following-shop",
+    route: FollowingShopRoute,
   },
 ];
 

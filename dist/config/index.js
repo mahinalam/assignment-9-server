@@ -20,6 +20,8 @@ exports.default = {
     cloudinary_cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     cloudinary_api_key: process.env.CLOUDINARY_API_KEY,
     cloudinary_api_secret: process.env.CLOUDINARY_API_SECRET,
+    admin_email: process.env.ADMIN_EMAIL,
+    admin_password: process.env.ADMIN_PASS,
     // reset_pass_link: process.env.RESET_PASS_LINK,
     // emailSender: {
     //     email: process.env.EMAIL,

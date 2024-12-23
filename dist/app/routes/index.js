@@ -13,6 +13,7 @@ const review_route_1 = require("../modules/Review/review.route");
 const order_route_1 = require("../modules/Order/order.route");
 const orderItem_route_1 = require("../modules/OrderItem/orderItem.route");
 const payment_route_1 = require("../modules/Payment/payment.route");
+const followingShop_route_1 = require("../modules/FollowingShop/followingShop.route");
 // import { userRoutes } from "../modules/User/user.routes";
 // import { AdminRoutes } from "../modules/Admin/admin.routes";
 // import { AuthRoutes } from "../modules/Auth/auth.routes";
@@ -63,6 +64,10 @@ const moduleRoutes = [
     {
         path: "/payment",
         route: payment_route_1.PaymentRoute,
+    },
+    {
+        path: "/following-shop",
+        route: followingShop_route_1.FollowingShopRoute,
     },
 ];
 moduleRoutes.forEach((route) => router.use(route.path, route.route));

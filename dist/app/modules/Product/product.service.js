@@ -77,6 +77,24 @@ const prisma_1 = __importDefault(require("../../../sharred/prisma"));
 //   console.log(result);
 //   return result;
 // };
+// /** @type {import('tailwindcss').Config} */
+// module.exports = {
+//   content: [
+//     './components/**/*.{js,ts,jsx,tsx,mdx}',
+//     './app/**/*.{js,ts,jsx,tsx,mdx}',
+//     './node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}'
+//   ],
+//   theme: {
+//     extend: {
+//       fontFamily: {
+//         sans: ["var(--font-sans)"],
+//         mono: ["var(--font-mono)"],
+//       },
+//     },
+//   },
+//   darkMode: "class",
+//   plugins: [require('@nextui-org/theme')], // Use 'require' to properly add the plugin
+// }
 const getAllProductsFromDB = (params) => __awaiter(void 0, void 0, void 0, function* () {
     const { searchTerms, sortBy = "name", sortOrder = "asc", searchFields = ["name", "description"], } = params;
     // Generate search conditions for each field
@@ -115,14 +133,15 @@ const createProductIntoDB = (payload, images) => __awaiter(void 0, void 0, void 
     return result;
 });
 // get all vendor shop products
-const getVendorShopProductsFromDB = (ownerId) => __awaiter(void 0, void 0, void 0, function* () {
+const getVendorShopProductsFromDB = (shopId) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield prisma_1.default.shop.findUniqueOrThrow({
         where: {
-            ownerId,
+            id: shopId,
             isDeleted: false,
         },
         include: {
             products: true,
+            followingShop: true,
         },
         // select: {
         //   id: true,

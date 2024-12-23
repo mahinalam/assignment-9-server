@@ -25,6 +25,8 @@ model User {
   order  Order[]
   review Review[]
 
+  followingShop FollowingShop[]
+
   @@map("users")
 }
 
@@ -38,9 +40,10 @@ model Shop {
   updatedAt   DateTime @updatedAt
   isDeleted   Boolean  @default(false)
 
-  ownerId  String    @unique
-  owner    User      @relation(fields: [ownerId], references: [id])
-  products Product[]
+  ownerId       String          @unique
+  owner         User            @relation(fields: [ownerId], references: [id])
+  products      Product[]
+  followingShop FollowingShop[]
 }
 
 model Category {
@@ -137,6 +140,17 @@ model Review {
   userId    String
   user      User     @relation(fields: [userId], references: [id])
   isDeleted Boolean  @default(false)
+}
+
+model FollowingShop {
+  followerId String
+  shopId     String
+
+  user User @relation(fields: [followerId], references: [id])
+  shop Shop @relation(fields: [shopId], references: [id])
+
+  @@id([followerId, shopId]) // This defines a composite primary key
+  @@map("following_shops") // (Optional) Custom table name in the database
 }
 
 enum UserRole {
