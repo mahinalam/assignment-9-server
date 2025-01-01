@@ -29,7 +29,8 @@ shop_controller_1.ShopController.createShop
 //   return userController.createAdmin(req, res, next);
 // }
 );
-router.get("/", (0, auth_1.default)(client_1.UserRole.VENDOR), shop_controller_1.ShopController.getVendorShop);
+router.get("/", shop_controller_1.ShopController.getAllShop);
+router.get("/vendor-shop", (0, auth_1.default)(client_1.UserRole.VENDOR), shop_controller_1.ShopController.getVendorShop);
 // // router.post(
 //   "/create-vendor",
 //   // auth(UserRole.ADMIN),

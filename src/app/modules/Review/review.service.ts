@@ -4,24 +4,58 @@ import ApiError from "../../errors/ApiError";
 import { TImageFile, TImageFiles } from "../../interfaces/file";
 
 // get all product specific reviews from db
+// const getProductSpecificReviews = async (productId: string) => {
+//   await prisma.product.findUniqueOrThrow({
+//     where: {
+//       id: productId,
+//       isDeleted: false,
+//     },
+//   });
+
+//   const result = await prisma.review.findMany({
+//     where: {
+//       productId,
+//       isDeleted: false,
+//     },
+//     // include: {
+//     //   user: true,
+//     // },
+//   });
+//   return result;
+// };
+
+// / get all product specific reviews from db
 const getProductSpecificReviews = async (productId: string) => {
-  await prisma.product.findUniqueOrThrow({
+  const result = await prisma.product.findUniqueOrThrow({
     where: {
       id: productId,
       isDeleted: false,
     },
+    include: {
+      review: true,
+    },
   });
 
-  const result = await prisma.review.findMany({
+  const reviews = result.review;
+
+  const reviewCounts = await prisma.review.groupBy({
+    by: ["rating"],
     where: {
-      productId,
+      productId: productId,
       isDeleted: false,
     },
-    // include: {
-    //   user: true,
-    // },
+    _count: true,
   });
-  return result;
+
+  const totalReviews = reviews.length;
+  const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
+  const averageRating = totalReviews > 0 ? totalRating / totalReviews : 0;
+
+  return {
+    reviews,
+    reviewCounts, // Counts of reviews per rating
+    averageRating, // Average rating for the product
+  };
 };
 
 const getAllVendorProductsReviews = async (ownerId: string) => {
@@ -66,6 +100,19 @@ const getAllVendorProductsReviews = async (ownerId: string) => {
   return vendorProducts;
 };
 
+const getUserProductReview = async (userId: string) => {
+  const vendorProducts = await prisma.review.findMany({
+    where: {
+      userId, // Match the Vendor's `ownerId`
+    },
+    include: {
+      product: true,
+    },
+  });
+
+  return vendorProducts;
+};
+
 const createReviewIntoDB = async (payload: any, images?: TImageFiles) => {
   if (images && images.reviewImages.length > 0) {
     payload.images = images.reviewImages.map((image: TImageFile) => image.path);
@@ -84,5 +131,6 @@ export const ReviewService = {
   getAllVendorProductsReviews,
   createReviewIntoDB,
   getProductSpecificReviews,
+  getUserProductReview,
   //   createCustomer,
 };

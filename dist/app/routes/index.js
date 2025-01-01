@@ -11,9 +11,9 @@ const shop_route_1 = require("../modules/Shop/shop.route");
 const product_route_1 = require("../modules/Product/product.route");
 const review_route_1 = require("../modules/Review/review.route");
 const order_route_1 = require("../modules/Order/order.route");
-const orderItem_route_1 = require("../modules/OrderItem/orderItem.route");
 const payment_route_1 = require("../modules/Payment/payment.route");
 const followingShop_route_1 = require("../modules/FollowingShop/followingShop.route");
+const brand_route_1 = require("../modules/Brand/brand.route");
 // import { userRoutes } from "../modules/User/user.routes";
 // import { AdminRoutes } from "../modules/Admin/admin.routes";
 // import { AuthRoutes } from "../modules/Auth/auth.routes";
@@ -54,10 +54,6 @@ const moduleRoutes = [
         route: order_route_1.OrderRoute,
     },
     {
-        path: "/order-item",
-        route: orderItem_route_1.OrderItemRoute,
-    },
-    {
         path: "/review",
         route: review_route_1.ReviewRoute,
     },
@@ -68,6 +64,10 @@ const moduleRoutes = [
     {
         path: "/following-shop",
         route: followingShop_route_1.FollowingShopRoute,
+    },
+    {
+        path: "/brand",
+        route: brand_route_1.BrandRoute,
     },
 ];
 moduleRoutes.forEach((route) => router.use(route.path, route.route));

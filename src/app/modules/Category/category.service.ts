@@ -3,9 +3,7 @@ import prisma from "../../../sharred/prisma";
 import ApiError from "../../errors/ApiError";
 import { TImageFile } from "../../interfaces/file";
 
-const createCategoryIntoDB = async (payload: Category, image: TImageFile) => {
-  payload.image = image.path;
-
+const createCategoryIntoDB = async (payload: Category) => {
   const result = await prisma.category.create({
     data: payload,
   });

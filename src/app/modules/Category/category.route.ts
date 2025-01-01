@@ -18,13 +18,7 @@ import { parseBody } from "../../middlewares/bodyParser";
 
 const router = express.Router();
 
-router.post(
-  "/",
-  // auth(UserRole.ADMIN),
-  multerUpload.single("categoryImage"),
-  parseBody,
-  CategoryController.createCategory
-);
+router.post("/", CategoryController.createCategory);
 
 router.get(
   "/",

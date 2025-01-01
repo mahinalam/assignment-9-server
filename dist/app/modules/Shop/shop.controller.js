@@ -40,9 +40,19 @@ const getVendorShop = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, 
         data: result,
     });
 }));
+const getAllShop = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield shop_service_1.ShopService.getAllShop();
+    (0, sendResponse_1.default)(res, {
+        success: true,
+        statusCode: 200,
+        message: "Shop retrieved successfully.",
+        data: result,
+    });
+}));
 exports.ShopController = {
     createShop,
     getVendorShop,
+    getAllShop,
     //   createCustomer,
     // getAllFromDB,
     // changeProfileStatus,

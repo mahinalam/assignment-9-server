@@ -16,9 +16,9 @@ exports.OrderService = void 0;
 const prisma_1 = __importDefault(require("../../../sharred/prisma"));
 const payment_utils_1 = require("../Payment/payment.utils");
 const createOrderIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const { userId, shippingAddress, orderItems } = payload;
+    const { userId, shippingAddress, orderItems, shopId } = payload;
     const totalPrice = orderItems.reduce((total, item) => {
-        return total + item.price * item.quantity;
+        return total + Number(item.price) * Number(item.quantity);
     }, 0);
     // Use a transaction to ensure atomicity
     const result = yield prisma_1.default.$transaction((prisma) => __awaiter(void 0, void 0, void 0, function* () {
@@ -32,6 +32,7 @@ const createOrderIntoDB = (payload) => __awaiter(void 0, void 0, void 0, functio
                 totalPrice,
                 shippingAddress,
                 transactionId,
+                shopId,
             },
             include: {
                 user: true,
@@ -41,8 +42,8 @@ const createOrderIntoDB = (payload) => __awaiter(void 0, void 0, void 0, functio
         const allOrderItems = orderItems.map((item) => ({
             orderId: orderInfo.id,
             productId: item.productId,
-            quantity: item.quantity,
-            price: item.price,
+            quantity: Number(item.quantity),
+            price: Number(item.price),
         }));
         yield prisma.orderItem.createMany({
             data: allOrderItems,
@@ -57,9 +58,10 @@ const createOrderIntoDB = (payload) => __awaiter(void 0, void 0, void 0, functio
         };
         // console.log("paymentData", paymentData);
         const paymentSession = yield (0, payment_utils_1.initiatePayment)(paymentData);
-        console.log("paymentSession", paymentSession);
+        // console.log("paymentdata", paymentData);
         return paymentSession;
     }));
+    console.log("result", result);
     return result;
 });
 // const getAllCategoriesFromDB = async () => {
@@ -67,26 +69,39 @@ const createOrderIntoDB = (payload) => __awaiter(void 0, void 0, void 0, functio
 //   return result;
 // };
 const getVendorOrderHistory = (vendorId) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("vendor id", vendorId);
+    // const orders = await prisma.order.findMany({
+    //   where: {
+    //     orderItems: {
+    //       some: {
+    //         product: {
+    //           shop: {
+    //             ownerId: vendorId,
+    //           },
+    //         },
+    //       },
+    //     },
+    //   },
+    //   include: {
+    //     orderItems: {
+    //       include: {
+    //         product: true, // Include product details
+    //       },
+    //     },
+    //     user: true, // Include user who placed the order
+    //     payment: true, // Include payment details
+    //   },
+    // });
     const orders = yield prisma_1.default.order.findMany({
         where: {
-            orderItems: {
-                some: {
-                    product: {
-                        shop: {
-                            ownerId: vendorId,
-                        },
-                    },
-                },
+            shop: {
+                ownerId: vendorId,
             },
         },
         include: {
-            orderItems: {
-                include: {
-                    product: true, // Include product details
-                },
-            },
-            user: true, // Include user who placed the order
-            payment: true, // Include payment details
+            orderItems: true,
+            shop: true,
+            user: true,
         },
     });
     return orders;

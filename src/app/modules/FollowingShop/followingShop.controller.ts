@@ -8,8 +8,8 @@ import ApiError from "../../errors/ApiError";
 import { TImageFile } from "../../interfaces/file";
 import { FollowingShopService } from "./followingShop.service";
 
-const createFollowingShop = catchAsync(async (req: Request, res: Response) => {
-  const result = await FollowingShopService.createFollowingShopIntoDB(req.body);
+const followShop = catchAsync(async (req: Request, res: Response) => {
+  const result = await FollowingShopService.followShop(req.body);
 
   sendResponse(res, {
     statusCode: 200,
@@ -31,7 +31,7 @@ const createFollowingShop = catchAsync(async (req: Request, res: Response) => {
 // });
 
 export const FollowingShopController = {
-  createFollowingShop,
+  followShop,
   //   getAllCategories,
   //   createCustomer,
   // getAllFromDB,

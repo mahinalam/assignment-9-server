@@ -17,25 +17,87 @@ const catchAsync_1 = __importDefault(require("../../../sharred/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../../sharred/sendResponse"));
 const product_service_1 = require("./product.service");
 const ApiError_1 = __importDefault(require("../../errors/ApiError"));
+const pick_1 = __importDefault(require("../../../sharred/pick"));
+const product_constant_1 = require("./product.constant");
+// const getAllProducts = catchAsync(async (req, res) => {
+//   const { searchTerms, sortBy, sortOrder, searchFields } = req.query;
+//   const parsedSearchTerms = Array.isArray(searchTerms)
+//     ? searchTerms.map(String) // Convert each term to a string
+//     : searchTerms
+//     ? [String(searchTerms)] // If there's a single term, convert it to an array
+//     : [];
+//   const parsedSortBy = (sortBy as "name" | "newPrice") || "name"; // Default to 'name' if not provided
+//   const parsedSortOrder = (sortOrder as "asc" | "desc") || "asc"; // Default to 'asc' if not provided
+//   const products = await ProductService.getAllProductsFromDB({
+//     searchTerms: parsedSearchTerms,
+//     sortBy: parsedSortBy,
+//     sortOrder: parsedSortOrder,
+//   });
+//   sendResponse(res, {
+//     success: true,
+//     statusCode: 200,
+//     message: "All products retrieved successfully",
+//     data: products,
+//   });
+// });
+// const getAllProducts = catchAsync(async (req, res) => {
+//   const {
+//     searchTerms,
+//     sortBy,
+//     sortOrder,
+//     priceMax,
+//     priceMin,
+//     rating,
+//     brand,
+//     page,
+//     limit,
+//     category,
+//   } = req.query;
+//   // Parse `searchTerms` as a comma-separated string
+//   const parsedSearchTerms = searchTerms
+//     ? String(searchTerms)
+//         .split(",")
+//         .map((term) => term.trim()) // Split by comma and trim whitespace
+//     : [];
+//   const parsedSortBy = (sortBy as "name" | "newPrice") || "name"; // Default to 'name' if not provided
+//   const parsedSortOrder = (sortOrder as "asc" | "desc") || "asc"; // Default to 'asc' if not provided
+//   console.log("price max", Number(priceMax));
+//   const products = await ProductService.getAllProductsFromDB({
+//     searchTerms: parsedSearchTerms,
+//     sortBy: parsedSortBy,
+//     sortOrder: parsedSortOrder,
+//     brand: brand as string,
+//     rating: Number(rating),
+//     priceRange: { min: Number(priceMin), max: Number(priceMax) },
+//     page: page ? Number(page) : 1,
+//     limit: limit ? Number(limit) : 10,
+//     category: category as string,
+//     // Add priceMin, priceMax, and rating filters here if needed
+//   });
+//   sendResponse(res, {
+//     success: true,
+//     statusCode: 200,
+//     message: "All products retrieved successfully",
+//     data: products,
+//   });
+// });
 const getAllProducts = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { searchTerms, sortBy, sortOrder, searchFields } = req.query;
-    const parsedSearchTerms = Array.isArray(searchTerms)
-        ? searchTerms.map(String) // Convert each term to a string
-        : searchTerms
-            ? [String(searchTerms)] // If there's a single term, convert it to an array
-            : [];
-    const parsedSortBy = sortBy || "name"; // Default to 'name' if not provided
-    const parsedSortOrder = sortOrder || "asc"; // Default to 'asc' if not provided
-    const products = yield product_service_1.ProductService.getAllProductsFromDB({
-        searchTerms: parsedSearchTerms,
-        sortBy: parsedSortBy,
-        sortOrder: parsedSortOrder,
-    });
+    //pick
+    const filterFields = (0, pick_1.default)(req.query, product_constant_1.productFilterableFields);
+    // pagination pick
+    const paginationOption = (0, pick_1.default)(req.query, [
+        "limit",
+        "page",
+        "sortBy",
+        "sortOrder",
+    ]);
+    const result = yield product_service_1.ProductService.getAllProductsFromDB(filterFields, paginationOption);
     (0, sendResponse_1.default)(res, {
-        success: true,
         statusCode: 200,
-        message: "All products retrieved successfully",
-        data: products,
+        success: true,
+        message: "Products retrieval successfully",
+        // meta: result.meta,
+        data: result,
     });
 }));
 const getSingleProductFromDB = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {

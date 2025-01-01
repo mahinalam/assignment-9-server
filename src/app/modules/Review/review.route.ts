@@ -25,6 +25,11 @@ router.get(
   // auth(UserRole.ADMIN),
   ReviewController.getVendorProductsReviews
 );
+router.get(
+  "/user-products-reviews/:id",
+  // auth(UserRole.ADMIN),
+  ReviewController.getUserProductReview
+);
 
 router.get(
   "/:id",

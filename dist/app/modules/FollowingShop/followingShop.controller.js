@@ -16,8 +16,8 @@ exports.FollowingShopController = void 0;
 const catchAsync_1 = __importDefault(require("../../../sharred/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../../sharred/sendResponse"));
 const followingShop_service_1 = require("./followingShop.service");
-const createFollowingShop = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield followingShop_service_1.FollowingShopService.createFollowingShopIntoDB(req.body);
+const followShop = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield followingShop_service_1.FollowingShopService.followShop(req.body);
     (0, sendResponse_1.default)(res, {
         statusCode: 200,
         success: true,
@@ -35,7 +35,7 @@ const createFollowingShop = (0, catchAsync_1.default)((req, res) => __awaiter(vo
 //   });
 // });
 exports.FollowingShopController = {
-    createFollowingShop,
+    followShop,
     //   getAllCategories,
     //   createCustomer,
     // getAllFromDB,

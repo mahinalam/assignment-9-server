@@ -4,14 +4,19 @@ import ApiError from "../../errors/ApiError";
 import { JwtPayload } from "jsonwebtoken";
 import { TImageFile } from "../../interfaces/file";
 
-// const createShopIntoDB = async (payload: Shop) => {
-//   // create shop
-//   const result = await prisma.shop.create({
-//     data: payload,
-//   });
+const getAllShop = async () => {
+  const result = await prisma.shop.findMany({
+    where: {
+      isDeleted: false,
+    },
+    include: {
+      followingShop: true,
+      products: true,
+    },
+  });
 
-//   return result;
-// };
+  return result;
+};
 
 const createShopIntoDB = async (payload: Shop, image: TImageFile) => {
   payload.logo = image.path;
@@ -65,6 +70,7 @@ const getVendorShop = async (user: JwtPayload) => {
 };
 
 export const ShopService = {
+  getAllShop,
   createShopIntoDB,
   getVendorShop,
   //   createCustomer,

@@ -3,7 +3,7 @@ import prisma from "../../../sharred/prisma";
 import ApiError from "../../errors/ApiError";
 import { JwtPayload } from "jsonwebtoken";
 
-const createFollowingShopIntoDB = async (payload: FollowingShop) => {
+const followShop = async (payload: FollowingShop) => {
   const result = await prisma.followingShop.create({
     data: payload,
   });
@@ -53,7 +53,7 @@ const getVendorShop = async (user: JwtPayload) => {
 };
 
 export const FollowingShopService = {
-  createFollowingShopIntoDB,
+  followShop,
   // getVendorShop,
   //   createCustomer,
 };

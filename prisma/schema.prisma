@@ -44,12 +44,13 @@ model Shop {
   owner         User            @relation(fields: [ownerId], references: [id])
   products      Product[]
   followingShop FollowingShop[]
+  Order         Order[]
 }
 
 model Category {
   id        String    @id @default(uuid())
   name      String    @unique
-  image     String
+  imageUrl  String?
   isDeleted Boolean   @default(false)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -58,26 +59,40 @@ model Category {
   @@map("categories")
 }
 
+model Brand {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  logoUrl     String?
+  description String    @default("")
+  isDeleted   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  Product     Product[]
+
+  @@map("brands")
+}
+
 model Product {
-  id          String   @id @default(uuid())
+  id          String      @id @default(uuid())
   name        String
   description String?
   newPrice    Int
   oldPrice    Int
   stock       Int
-  isFlash     Boolean  @default(false)
-  images      String[] @default([])
-  disCounts   Int      @default(0)
-  isDeleted   Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  shop        Shop?    @relation(fields: [shopId], references: [id])
+  isFlash     Boolean     @default(false)
+  images      String[]    @default([])
+  disCounts   Int         @default(0)
+  isDeleted   Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  shop        Shop?       @relation(fields: [shopId], references: [id])
   shopId      String?
-
-  categoryId String
-  category   Category    @relation(fields: [categoryId], references: [id])
-  orderItem  OrderItem[]
-  review     Review[]
+  brandId     String?
+  brand       Brand?      @relation(fields: [brandId], references: [id])
+  categoryId  String
+  category    Category    @relation(fields: [categoryId], references: [id])
+  orderItem   OrderItem[]
+  review      Review[]
 
   @@map("products")
 }
@@ -93,6 +108,8 @@ model Order {
   isDeleted       Boolean       @default(false)
   userId          String
   user            User          @relation(fields: [userId], references: [id])
+  shopId          String
+  shop            Shop          @relation(fields: [shopId], references: [id])
   orderItems      OrderItem[]
   payment         Payment?
   paymentStatus   PaymentStatus @default(PENDING)

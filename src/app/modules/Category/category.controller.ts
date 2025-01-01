@@ -9,13 +9,7 @@ import ApiError from "../../errors/ApiError";
 import { TImageFile } from "../../interfaces/file";
 
 const createCategory = catchAsync(async (req: Request, res: Response) => {
-  if (!req.file) {
-    throw new ApiError(400, "Please upload an image");
-  }
-  const result = await CategoryService.createCategoryIntoDB(
-    req.body,
-    req.file as TImageFile
-  );
+  const result = await CategoryService.createCategoryIntoDB(req.body);
 
   sendResponse(res, {
     statusCode: 200,

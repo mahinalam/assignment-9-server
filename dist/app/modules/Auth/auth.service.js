@@ -59,7 +59,10 @@ const loginUser = (payload) => __awaiter(void 0, void 0, void 0, function* () {
             status: client_1.UserStatus.ACTIVE,
         },
     });
+    console.log("payload", payload.password);
+    console.log("user", userData.password);
     const isCorrectPassword = yield bcrypt.compare(payload.password, userData.password);
+    console.log(isCorrectPassword);
     if (!isCorrectPassword) {
         throw new Error("Password incorrect!");
     }

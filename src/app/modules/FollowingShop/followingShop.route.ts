@@ -16,7 +16,7 @@ const router = express.Router();
 router.post(
   "/",
   // auth(UserRole.ADMIN),
-  FollowingShopController.createFollowingShop
+  FollowingShopController.followShop
 );
 
 // router.get(

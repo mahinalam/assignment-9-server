@@ -18,6 +18,9 @@ multer_config_1.multerUpload.fields([{ name: "reviewImages" }]), (0, validateIma
 router.get("/vendor-products-reviews/:id", 
 // auth(UserRole.ADMIN),
 review_controller_1.ReviewController.getVendorProductsReviews);
+router.get("/user-products-reviews/:id", 
+// auth(UserRole.ADMIN),
+review_controller_1.ReviewController.getUserProductReview);
 router.get("/:id", 
 // auth(UserRole.ADMIN),
 review_controller_1.ReviewController.getProductSpecificReviews);

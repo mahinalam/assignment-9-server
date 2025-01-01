@@ -34,7 +34,8 @@ router.post(
   // }
 );
 
-router.get("/", auth(UserRole.VENDOR), ShopController.getVendorShop);
+router.get("/", ShopController.getAllShop);
+router.get("/vendor-shop", auth(UserRole.VENDOR), ShopController.getVendorShop);
 // // router.post(
 //   "/create-vendor",
 //   // auth(UserRole.ADMIN),

@@ -9,7 +9,7 @@ const followingShop_controller_1 = require("./followingShop.controller");
 const router = express_1.default.Router();
 router.post("/", 
 // auth(UserRole.ADMIN),
-followingShop_controller_1.FollowingShopController.createFollowingShop);
+followingShop_controller_1.FollowingShopController.followShop);
 // router.get(
 //   "/",
 //   // auth(UserRole.ADMIN),

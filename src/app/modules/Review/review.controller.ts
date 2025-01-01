@@ -45,11 +45,23 @@ const getVendorProductsReviews = catchAsync(async (req, res) => {
     data: reviews,
   });
 });
+const getUserProductReview = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const reviews = await ReviewService.getUserProductReview(id);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    message: "Reviews retrieved successfully",
+    data: reviews,
+  });
+});
 
 export const ReviewController = {
   createReview,
   getProductSpecificReviews,
   getVendorProductsReviews,
+  getUserProductReview,
   //   createCustomer,
   // getAllFromDB,
   // changeProfileStatus,

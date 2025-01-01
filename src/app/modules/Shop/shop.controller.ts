@@ -45,9 +45,21 @@ const getVendorShop = catchAsync(async (req, res) => {
   });
 });
 
+const getAllShop = catchAsync(async (req, res) => {
+  const result = await ShopService.getAllShop();
+
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    message: "Shop retrieved successfully.",
+    data: result,
+  });
+});
+
 export const ShopController = {
   createShop,
   getVendorShop,
+  getAllShop,
   //   createCustomer,
   // getAllFromDB,
   // changeProfileStatus,

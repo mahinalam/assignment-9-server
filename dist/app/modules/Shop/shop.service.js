@@ -14,13 +14,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ShopService = void 0;
 const prisma_1 = __importDefault(require("../../../sharred/prisma"));
-// const createShopIntoDB = async (payload: Shop) => {
-//   // create shop
-//   const result = await prisma.shop.create({
-//     data: payload,
-//   });
-//   return result;
-// };
+const getAllShop = () => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield prisma_1.default.shop.findMany({
+        where: {
+            isDeleted: false,
+        },
+        include: {
+            followingShop: true,
+            products: true,
+        },
+    });
+    return result;
+});
 const createShopIntoDB = (payload, image) => __awaiter(void 0, void 0, void 0, function* () {
     payload.logo = image.path;
     const result = yield prisma_1.default.shop.create({
@@ -69,6 +74,7 @@ const getVendorShop = (user) => __awaiter(void 0, void 0, void 0, function* () {
     return result;
 });
 exports.ShopService = {
+    getAllShop,
     createShopIntoDB,
     getVendorShop,
     //   createCustomer,

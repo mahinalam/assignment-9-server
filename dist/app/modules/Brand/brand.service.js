@@ -12,20 +12,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CategoryService = void 0;
+exports.BrandService = void 0;
 const prisma_1 = __importDefault(require("../../../sharred/prisma"));
-const createCategoryIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield prisma_1.default.category.create({
+const createBrandIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield prisma_1.default.brand.create({
         data: payload,
     });
     return result;
 });
-const getAllCategoriesFromDB = () => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield prisma_1.default.category.findMany();
+const getAllBrandFromDB = () => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield prisma_1.default.brand.findMany();
     return result;
 });
-exports.CategoryService = {
-    createCategoryIntoDB,
-    getAllCategoriesFromDB,
+exports.BrandService = {
+    createBrandIntoDB,
+    getAllBrandFromDB,
     //   createCustomer,
 };

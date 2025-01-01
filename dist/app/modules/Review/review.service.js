@@ -15,23 +15,52 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ReviewService = void 0;
 const prisma_1 = __importDefault(require("../../../sharred/prisma"));
 // get all product specific reviews from db
+// const getProductSpecificReviews = async (productId: string) => {
+//   await prisma.product.findUniqueOrThrow({
+//     where: {
+//       id: productId,
+//       isDeleted: false,
+//     },
+//   });
+//   const result = await prisma.review.findMany({
+//     where: {
+//       productId,
+//       isDeleted: false,
+//     },
+//     // include: {
+//     //   user: true,
+//     // },
+//   });
+//   return result;
+// };
+// / get all product specific reviews from db
 const getProductSpecificReviews = (productId) => __awaiter(void 0, void 0, void 0, function* () {
-    yield prisma_1.default.product.findUniqueOrThrow({
+    const result = yield prisma_1.default.product.findUniqueOrThrow({
         where: {
             id: productId,
             isDeleted: false,
         },
+        include: {
+            review: true,
+        },
     });
-    const result = yield prisma_1.default.review.findMany({
+    const reviews = result.review;
+    const reviewCounts = yield prisma_1.default.review.groupBy({
+        by: ["rating"],
         where: {
-            productId,
+            productId: productId,
             isDeleted: false,
         },
-        // include: {
-        //   user: true,
-        // },
+        _count: true,
     });
-    return result;
+    const totalReviews = reviews.length;
+    const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
+    const averageRating = totalReviews > 0 ? totalRating / totalReviews : 0;
+    return {
+        reviews,
+        reviewCounts, // Counts of reviews per rating
+        averageRating, // Average rating for the product
+    };
 });
 const getAllVendorProductsReviews = (ownerId) => __awaiter(void 0, void 0, void 0, function* () {
     // await prisma.product.findUniqueOrThrow({
@@ -72,6 +101,17 @@ const getAllVendorProductsReviews = (ownerId) => __awaiter(void 0, void 0, void 
     });
     return vendorProducts;
 });
+const getUserProductReview = (userId) => __awaiter(void 0, void 0, void 0, function* () {
+    const vendorProducts = yield prisma_1.default.review.findMany({
+        where: {
+            userId, // Match the Vendor's `ownerId`
+        },
+        include: {
+            product: true,
+        },
+    });
+    return vendorProducts;
+});
 const createReviewIntoDB = (payload, images) => __awaiter(void 0, void 0, void 0, function* () {
     if (images && images.reviewImages.length > 0) {
         payload.images = images.reviewImages.map((image) => image.path);
@@ -88,5 +128,6 @@ exports.ReviewService = {
     getAllVendorProductsReviews,
     createReviewIntoDB,
     getProductSpecificReviews,
+    getUserProductReview,
     //   createCustomer,
 };

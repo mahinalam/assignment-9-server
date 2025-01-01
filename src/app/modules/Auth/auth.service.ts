@@ -13,12 +13,14 @@ const loginUser = async (payload: { email: string; password: string }) => {
       status: UserStatus.ACTIVE,
     },
   });
+  console.log("payload", payload.password);
+  console.log("user", userData.password);
 
   const isCorrectPassword: boolean = await bcrypt.compare(
     payload.password,
     userData.password
   );
-
+  console.log(isCorrectPassword);
   if (!isCorrectPassword) {
     throw new Error("Password incorrect!");
   }

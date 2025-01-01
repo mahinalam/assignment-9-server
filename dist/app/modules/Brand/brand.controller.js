@@ -12,31 +12,31 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CategoryController = void 0;
+exports.BrandController = void 0;
 const catchAsync_1 = __importDefault(require("../../../sharred/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../../sharred/sendResponse"));
-const category_service_1 = require("./category.service");
-const createCategory = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield category_service_1.CategoryService.createCategoryIntoDB(req.body);
+const brand_service_1 = require("./brand.service");
+const createBarnd = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield brand_service_1.BrandService.createBrandIntoDB(req.body);
     (0, sendResponse_1.default)(res, {
         statusCode: 200,
         success: true,
-        message: "Category Created successfuly!",
+        message: "Brand Created successfuly!",
         data: result,
     });
 }));
-const getAllCategories = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const categories = yield category_service_1.CategoryService.getAllCategoriesFromDB();
+const getAllBarnd = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const categories = yield brand_service_1.BrandService.getAllBrandFromDB();
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: 200,
-        message: "Categories retrieved successfully",
+        message: "Brands retrieved successfully",
         data: categories,
     });
 }));
-exports.CategoryController = {
-    createCategory,
-    getAllCategories,
+exports.BrandController = {
+    createBarnd,
+    getAllBarnd,
     //   createCustomer,
     // getAllFromDB,
     // changeProfileStatus,

@@ -14,7 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FollowingShopService = void 0;
 const prisma_1 = __importDefault(require("../../../sharred/prisma"));
-const createFollowingShopIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+const followShop = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield prisma_1.default.followingShop.create({
         data: payload,
     });
@@ -61,7 +61,7 @@ const getVendorShop = (user) => __awaiter(void 0, void 0, void 0, function* () {
     return result;
 });
 exports.FollowingShopService = {
-    createFollowingShopIntoDB,
+    followShop,
     // getVendorShop,
     //   createCustomer,
 };

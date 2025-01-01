@@ -6,34 +6,33 @@ import sendResponse from "../../../sharred/sendResponse";
 import prisma from "../../../sharred/prisma";
 import ApiError from "../../errors/ApiError";
 import { TImageFile } from "../../interfaces/file";
-import { OrderItemService } from "./orderItem.service";
+import { BrandService } from "./brand.service";
 
-const createOrderItem = catchAsync(async (req: Request, res: Response) => {
-  const result = await OrderItemService.createOrderItemIntoDB(req.body);
+const createBarnd = catchAsync(async (req: Request, res: Response) => {
+  const result = await BrandService.createBrandIntoDB(req.body);
 
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "Order Item created successfuly!",
+    message: "Brand Created successfuly!",
     data: result,
   });
 });
 
-const getAllOrderItem = catchAsync(async (req, res) => {
-  const orderItems = await OrderItemService.getOrderItemsFromDB();
+const getAllBarnd = catchAsync(async (req, res) => {
+  const categories = await BrandService.getAllBrandFromDB();
 
   sendResponse(res, {
     success: true,
     statusCode: 200,
-    message: "Order Items retrieved successfully",
-    data: orderItems,
+    message: "Brands retrieved successfully",
+    data: categories,
   });
 });
 
-export const OrderItemController = {
-  createOrderItem,
-  getAllOrderItem,
-  //   getAllCategories,
+export const BrandController = {
+  createBarnd,
+  getAllBarnd,
   //   createCustomer,
   // getAllFromDB,
   // changeProfileStatus,

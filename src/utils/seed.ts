@@ -2,6 +2,7 @@
 import { UserRole, UserStatus } from "@prisma/client";
 import config from "../config";
 import prisma from "../sharred/prisma";
+import * as bcrypt from "bcrypt";
 
 export const seed = async () => {
   try {
@@ -15,13 +16,17 @@ export const seed = async () => {
     });
     if (!admin) {
       console.log("Seeding started...");
-
+      const hashedPassword = await bcrypt.hash(
+        config.admin_password as string,
+        12
+      );
       await prisma.user.create({
         data: {
           name: "Mahin",
           role: UserRole.ADMIN,
           email: config.admin_email as string,
-          password: config.admin_password as string,
+
+          password: hashedPassword,
           address: "Dhamrai, Dhaka",
           phoneNumber: "0123456789",
           status: UserStatus.ACTIVE,
