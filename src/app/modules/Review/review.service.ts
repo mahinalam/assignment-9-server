@@ -37,7 +37,6 @@ const getProductSpecificReviews = async (productId: string) => {
   });
 
   const reviews = result.review;
-
   const reviewCounts = await prisma.review.groupBy({
     by: ["rating"],
     where: {

@@ -9,6 +9,7 @@ import { OrderRoute } from "../modules/Order/order.route";
 import { PaymentRoute } from "../modules/Payment/payment.route";
 import { FollowingShopRoute } from "../modules/FollowingShop/followingShop.route";
 import { BrandRoute } from "../modules/Brand/brand.route";
+import { CouponRoute } from "../modules/Coupon/coupon.route";
 // import { userRoutes } from "../modules/User/user.routes";
 // import { AdminRoutes } from "../modules/Admin/admin.routes";
 // import { AuthRoutes } from "../modules/Auth/auth.routes";
@@ -65,6 +66,10 @@ const moduleRoutes = [
   {
     path: "/brand",
     route: BrandRoute,
+  },
+  {
+    path: "/coupon",
+    route: CouponRoute,
   },
 ];
 

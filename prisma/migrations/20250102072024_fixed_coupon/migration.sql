@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Coupon" ALTER COLUMN "type" SET DEFAULT 'PERCENTAGE';

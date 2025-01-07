@@ -4,6 +4,8 @@ import { JwtPayload } from "jsonwebtoken";
 import catchAsync from "../../../sharred/catchAsync";
 import sendResponse from "../../../sharred/sendResponse";
 import { UserService } from "./user.service";
+import ApiError from "../../errors/ApiError";
+import { TImageFile } from "../../interfaces/file";
 
 const getAllUsers = catchAsync(async (req, res) => {
   const result = await UserService.getAllUsersFromDB();
@@ -34,6 +36,20 @@ const createUser = catchAsync(async (req: Request, res: Response) => {
     statusCode: 200,
     success: true,
     message: "User Created successfuly!",
+    data: result,
+  });
+});
+
+const updateMyProfile = catchAsync(async (req: Request, res: Response) => {
+  const result = await UserService.updateMyProfile(
+    req.body,
+    req.file as TImageFile
+  );
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Profile Updated successfuly!",
     data: result,
   });
 });
@@ -100,6 +116,7 @@ export const UserController = {
   getAllUsers,
   createUser,
   getSingleUser,
+  updateMyProfile,
   // changeProfileStatus,
   // getMyProfile,
   // updateMyProfie

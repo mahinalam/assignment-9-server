@@ -9,23 +9,25 @@ datasource db {
 }
 
 model User {
-  id          String     @id @default(uuid())
-  name        String
-  email       String     @unique
-  password    String
-  role        UserRole
-  phoneNumber String?
-  address     String?
-  status      UserStatus @default(ACTIVE)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  isDeleted   Boolean    @default(false)
+  id           String     @id @default(uuid())
+  name         String
+  email        String     @unique
+  password     String
+  role         UserRole
+  phoneNumber  String?
+  profilePhoto String?
+  address      String?
+  status       UserStatus @default(ACTIVE)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  isDeleted    Boolean    @default(false)
 
   shop   Shop?
   order  Order[]
   review Review[]
 
   followingShop FollowingShop[]
+  Cart          Cart?
 
   @@map("users")
 }
@@ -45,6 +47,7 @@ model Shop {
   products      Product[]
   followingShop FollowingShop[]
   Order         Order[]
+  Cart          Cart[]
 }
 
 model Category {
@@ -93,8 +96,33 @@ model Product {
   category    Category    @relation(fields: [categoryId], references: [id])
   orderItem   OrderItem[]
   review      Review[]
+  CartItem    CartItem[]
 
   @@map("products")
+}
+
+model Cart {
+  id            String     @id @default(uuid())
+  userId        String     @unique
+  user          User       @relation(fields: [userId], references: [id])
+  shopId        String
+  shop          Shop       @relation(fields: [shopId], references: [id])
+  totalQuantity Float
+  totalAmount   Float
+  CartItem      CartItem[]
+
+  @@unique([userId, shopId])
+}
+
+model CartItem {
+  cartId    String
+  cart      Cart    @relation(fields: [cartId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Float
+  price     Float
+
+  @@id([cartId, productId])
 }
 
 model Order {
@@ -128,6 +156,27 @@ model OrderItem {
   product Product @relation(fields: [productId], references: [id])
   orderId String
   order   Order   @relation(fields: [orderId], references: [id])
+}
+
+model Coupon {
+  id          String     @id @default(uuid()) // Unique identifier for each coupon
+  code        String     @unique // Coupon code, e.g., "SUMMER20"
+  discount    Float
+  type        CouponType @default(PERCENTAGE)
+  expiration  DateTime
+  minPurchase Float?
+  usageCount  Int        @default(0)
+  maxUsage    Int?
+  isDeleted   Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([code])
+}
+
+enum CouponType {
+  PERCENTAGE
+  FIXED
 }
 
 model Payment {
