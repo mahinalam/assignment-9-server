@@ -1,10 +1,7 @@
-import { Request, RequestHandler, Response } from "express";
-import { UserRole } from "@prisma/client";
-import { JwtPayload } from "jsonwebtoken";
+import { Request, Response } from "express";
 import catchAsync from "../../../sharred/catchAsync";
 import sendResponse from "../../../sharred/sendResponse";
 import { UserService } from "./user.service";
-import ApiError from "../../errors/ApiError";
 import { TImageFile } from "../../interfaces/file";
 
 const getAllUsers = catchAsync(async (req, res) => {
@@ -26,6 +23,41 @@ const getSingleUser = catchAsync(async (req, res) => {
     success: true,
     statusCode: 200,
     message: "User retrieved successfully",
+    data: result,
+  });
+});
+
+const getAdminStats = catchAsync(async (req, res) => {
+  const result = await UserService.getAdminStats();
+
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    message: "Admin stats successfully",
+    data: result,
+  });
+});
+
+const getVendorStats = catchAsync(async (req, res) => {
+  const { userId } = req.user;
+  const result = await UserService.getVendorStats(userId);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    message: "Vendor stats successfully",
+    data: result,
+  });
+});
+
+const getUserStats = catchAsync(async (req, res) => {
+  const { email } = req.user;
+  const result = await UserService.getUserStats(email);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    message: "User stats successfully",
     data: result,
   });
 });
@@ -54,70 +86,12 @@ const updateMyProfile = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-// const getAllFromDB = catchAsync(async (req: Request, res: Response) => {
-//   // console.log(req.query)
-//   const filters = pick(req.query, userFilterableFields);
-//   const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
-
-//   const result = await userService.getAllFromDB(filters, options);
-
-//   sendResponse(res, {
-//     statusCode: httpStatus.OK,
-//     success: true,
-//     message: "Users data fetched!",
-//     meta: result.meta,
-//     data: result.data,
-//   });
-// });
-
-// const changeProfileStatus = catchAsync(async (req: Request, res: Response) => {
-//   const { id } = req.params;
-//   const result = await userService.changeProfileStatus(id, req.body);
-
-//   sendResponse(res, {
-//     statusCode: httpStatus.OK,
-//     success: true,
-//     message: "Users profile status changed!",
-//     data: result,
-//   });
-// });
-
-// const getMyProfile = catchAsync(
-//   async (req: Request & { user?: IAuthUser }, res: Response) => {
-//     const user = req.user;
-
-//     const result = await userService.getMyProfile(user as IAuthUser);
-
-//     sendResponse(res, {
-//       statusCode: httpStatus.OK,
-//       success: true,
-//       message: "My profile data fetched!",
-//       data: result,
-//     });
-//   }
-// );
-
-// const updateMyProfie = catchAsync(
-//   async (req: Request & { user?: IAuthUser }, res: Response) => {
-//     const user = req.user;
-
-//     const result = await userService.updateMyProfie(user as IAuthUser, req);
-
-//     sendResponse(res, {
-//       statusCode: httpStatus.OK,
-//       success: true,
-//       message: "My profile updated!",
-//       data: result,
-//     });
-//   }
-// );
-
 export const UserController = {
   getAllUsers,
   createUser,
   getSingleUser,
   updateMyProfile,
-  // changeProfileStatus,
-  // getMyProfile,
-  // updateMyProfie
+  getAdminStats,
+  getVendorStats,
+  getUserStats,
 };

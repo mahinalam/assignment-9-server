@@ -5,15 +5,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrderRoute = void 0;
 const express_1 = __importDefault(require("express"));
+const client_1 = require("@prisma/client");
+const auth_1 = __importDefault(require("../../middlewares/auth"));
 const order_controller_1 = require("./order.controller");
 const router = express_1.default.Router();
-router.post("/", 
-//   auth(UserRole.ADMIN),
-order_controller_1.OrderController.createOrder);
-router.get("/:id", 
-// auth(UserRole.ADMIN),
-order_controller_1.OrderController.getVendorOrderHistory);
-router.get("/order-history/:id", 
-// auth(UserRole.ADMIN),
-order_controller_1.OrderController.getUsersOrderHistory);
+router.post("/", (0, auth_1.default)(client_1.UserRole.USER), order_controller_1.OrderController.createOrder);
+router.get("/vendor-order-history", (0, auth_1.default)(client_1.UserRole.VENDOR), order_controller_1.OrderController.getVendorOrderHistory);
+router.get("/user-order-history", (0, auth_1.default)(client_1.UserRole.USER), order_controller_1.OrderController.getUsersOrderHistory);
+router.get("/order-history", (0, auth_1.default)(client_1.UserRole.ADMIN), order_controller_1.OrderController.getAllOrderHistory);
+router.get("/unconfirm-order", (0, auth_1.default)(client_1.UserRole.USER), order_controller_1.OrderController.getUserUnconfirmOrder);
+router.put("/update-order", (0, auth_1.default)(client_1.UserRole.USER, client_1.UserRole.ADMIN, client_1.UserRole.ADMIN), order_controller_1.OrderController.updateOrderStatus);
 exports.OrderRoute = router;

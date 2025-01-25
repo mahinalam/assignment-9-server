@@ -16,10 +16,12 @@ import { TImageFile } from "../../interfaces/file";
 // import { CategoryService } from "./category.service";
 
 const createShop = catchAsync(async (req: Request, res: Response) => {
+  const { userId } = req.user;
   if (!req.file) {
     throw new ApiError(400, "Please upload an image");
   }
   const result = await ShopService.createShopIntoDB(
+    userId,
     req.body,
     req.file as TImageFile
   );
@@ -56,13 +58,21 @@ const getAllShop = catchAsync(async (req, res) => {
   });
 });
 
+const followShop = catchAsync(async (req: Request, res: Response) => {
+  const { userId } = req.user;
+  const result = await ShopService.followShop(userId, req.body.shopId);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Successfully Followed Shop!",
+    data: result,
+  });
+});
+
 export const ShopController = {
   createShop,
   getVendorShop,
   getAllShop,
-  //   createCustomer,
-  // getAllFromDB,
-  // changeProfileStatus,
-  // getMyProfile,
-  // updateMyProfie
+  followShop,
 };

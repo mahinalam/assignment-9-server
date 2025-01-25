@@ -1,7 +1,6 @@
-import { Category, Coupon, UserRole } from "@prisma/client";
+import { Coupon } from "@prisma/client";
 import prisma from "../../../sharred/prisma";
 import ApiError from "../../errors/ApiError";
-import { TImageFile } from "../../interfaces/file";
 
 const createCouponIntoDB = async (payload: Coupon) => {
   const result = await prisma.coupon.create({
@@ -32,7 +31,7 @@ const applyCouponCode = async (code: string) => {
     throw new ApiError(404, "Coupon expired date has been ended.");
   }
 
-  return true;
+  return isCouponExists;
 };
 
 const getAllCoupon = async () => {
@@ -44,5 +43,4 @@ export const CouponService = {
   createCouponIntoDB,
   getAllCoupon,
   applyCouponCode,
-  //   createCustomer,
 };

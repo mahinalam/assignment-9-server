@@ -41,10 +41,4 @@ export const CouponController = {
   createCoupon,
   applyCouponCode,
   allCoupon,
-  //   getAllCategories,
-  //   createCustomer,
-  // getAllFromDB,
-  // changeProfileStatus,
-  // getMyProfile,
-  // updateMyProfie
 };

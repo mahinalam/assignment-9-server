@@ -19,71 +19,11 @@ const product_service_1 = require("./product.service");
 const ApiError_1 = __importDefault(require("../../errors/ApiError"));
 const pick_1 = __importDefault(require("../../../sharred/pick"));
 const product_constant_1 = require("./product.constant");
-// const getAllProducts = catchAsync(async (req, res) => {
-//   const { searchTerms, sortBy, sortOrder, searchFields } = req.query;
-//   const parsedSearchTerms = Array.isArray(searchTerms)
-//     ? searchTerms.map(String) // Convert each term to a string
-//     : searchTerms
-//     ? [String(searchTerms)] // If there's a single term, convert it to an array
-//     : [];
-//   const parsedSortBy = (sortBy as "name" | "newPrice") || "name"; // Default to 'name' if not provided
-//   const parsedSortOrder = (sortOrder as "asc" | "desc") || "asc"; // Default to 'asc' if not provided
-//   const products = await ProductService.getAllProductsFromDB({
-//     searchTerms: parsedSearchTerms,
-//     sortBy: parsedSortBy,
-//     sortOrder: parsedSortOrder,
-//   });
-//   sendResponse(res, {
-//     success: true,
-//     statusCode: 200,
-//     message: "All products retrieved successfully",
-//     data: products,
-//   });
-// });
-// const getAllProducts = catchAsync(async (req, res) => {
-//   const {
-//     searchTerms,
-//     sortBy,
-//     sortOrder,
-//     priceMax,
-//     priceMin,
-//     rating,
-//     brand,
-//     page,
-//     limit,
-//     category,
-//   } = req.query;
-//   // Parse `searchTerms` as a comma-separated string
-//   const parsedSearchTerms = searchTerms
-//     ? String(searchTerms)
-//         .split(",")
-//         .map((term) => term.trim()) // Split by comma and trim whitespace
-//     : [];
-//   const parsedSortBy = (sortBy as "name" | "newPrice") || "name"; // Default to 'name' if not provided
-//   const parsedSortOrder = (sortOrder as "asc" | "desc") || "asc"; // Default to 'asc' if not provided
-//   console.log("price max", Number(priceMax));
-//   const products = await ProductService.getAllProductsFromDB({
-//     searchTerms: parsedSearchTerms,
-//     sortBy: parsedSortBy,
-//     sortOrder: parsedSortOrder,
-//     brand: brand as string,
-//     rating: Number(rating),
-//     priceRange: { min: Number(priceMin), max: Number(priceMax) },
-//     page: page ? Number(page) : 1,
-//     limit: limit ? Number(limit) : 10,
-//     category: category as string,
-//     // Add priceMin, priceMax, and rating filters here if needed
-//   });
-//   sendResponse(res, {
-//     success: true,
-//     statusCode: 200,
-//     message: "All products retrieved successfully",
-//     data: products,
-//   });
-// });
 const getAllProducts = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("authorization", req.headers.authorization);
     //pick
     const filterFields = (0, pick_1.default)(req.query, product_constant_1.productFilterableFields);
+    console.log({ filterFields });
     // pagination pick
     const paginationOption = (0, pick_1.default)(req.query, [
         "limit",
@@ -100,6 +40,37 @@ const getAllProducts = (0, catchAsync_1.default)((req, res) => __awaiter(void 0,
         data: result,
     });
 }));
+// const getAllProducts = catchAsync(async (req, res) => {
+//   const {
+//     rating,
+//     brandId,
+//     categoryId,
+//     priceMin,
+//     priceMax,
+//     searchTerm,
+//     sortOrder,
+//     page,
+//     limit,
+//   } = req.query;
+//   const result = await ProductService.getAllProductsFromDB(
+//     Number(rating),
+//     brandId,
+//     categoryId,
+//     Number(priceMin),
+//     Number(priceMax),
+//     searchTerm,
+//     sortOrder,
+//     Number(page),
+//     Number(limit)
+//   );
+//   sendResponse(res, {
+//     statusCode: 200,
+//     success: true,
+//     message: "Products retrieval successfully",
+//     // meta: result.meta,
+//     data: result,
+//   });
+// });
 const getSingleProductFromDB = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     const product = yield product_service_1.ProductService.getSingleProductFromDB(id);

@@ -12,21 +12,9 @@ const product_route_1 = require("../modules/Product/product.route");
 const review_route_1 = require("../modules/Review/review.route");
 const order_route_1 = require("../modules/Order/order.route");
 const payment_route_1 = require("../modules/Payment/payment.route");
-const followingShop_route_1 = require("../modules/FollowingShop/followingShop.route");
 const brand_route_1 = require("../modules/Brand/brand.route");
-// import { userRoutes } from "../modules/User/user.routes";
-// import { AdminRoutes } from "../modules/Admin/admin.routes";
-// import { AuthRoutes } from "../modules/Auth/auth.routes";
-// import { SpecialtiesRoutes } from "../modules/Specialties/specialties.routes";
-// import { DoctorRoutes } from "../modules/Doctor/doctor.routes";
-// import { PatientRoutes } from "../modules/Patient/patient.route";
-// import { ScheduleRoutes } from "../modules/Schedule/schedule.routes";
-// import { DoctorScheduleRoutes } from "../modules/DoctorSchedule/doctorSchedule.routes";
-// import { AppointmentRoutes } from "../modules/Appointment/appointment.routes";
-// import { PaymentRoutes } from "../modules/Payment/payment.routes";
-// import { PrescriptionRoutes } from "../modules/Prescription/prescription.routes";
-// import { ReviewRoutes } from "../modules/Review/review.routes";
-// import { MetaRoutes } from "../modules/Meta/meta.routes";
+const coupon_route_1 = require("../modules/Coupon/coupon.route");
+const cart_route_1 = require("../modules/Cart/cart.route");
 const router = express_1.default.Router();
 const moduleRoutes = [
     {
@@ -62,12 +50,16 @@ const moduleRoutes = [
         route: payment_route_1.PaymentRoute,
     },
     {
-        path: "/following-shop",
-        route: followingShop_route_1.FollowingShopRoute,
-    },
-    {
         path: "/brand",
         route: brand_route_1.BrandRoute,
+    },
+    {
+        path: "/coupon",
+        route: coupon_route_1.CouponRoute,
+    },
+    {
+        path: "/cart",
+        route: cart_route_1.CartRoute,
     },
 ];
 moduleRoutes.forEach((route) => router.use(route.path, route.route));

@@ -26,8 +26,27 @@ const createOrder = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, vo
     });
 }));
 const getVendorOrderHistory = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { id } = req.params;
-    const orders = yield order_service_1.OrderService.getVendorOrderHistory(id);
+    const { userId } = req.user;
+    const orders = yield order_service_1.OrderService.getVendorOrderHistory(userId);
+    (0, sendResponse_1.default)(res, {
+        success: true,
+        statusCode: 200,
+        message: "Vendor Order History retrieved successfully",
+        data: orders,
+    });
+}));
+const getUsersOrderHistory = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { email } = req.user;
+    const orders = yield order_service_1.OrderService.getUsersOrderHistory(email);
+    (0, sendResponse_1.default)(res, {
+        success: true,
+        statusCode: 200,
+        message: "User Order History retrieved successfully",
+        data: orders,
+    });
+}));
+const getAllOrderHistory = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const orders = yield order_service_1.OrderService.getAllOrderHistory();
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: 200,
@@ -35,13 +54,23 @@ const getVendorOrderHistory = (0, catchAsync_1.default)((req, res) => __awaiter(
         data: orders,
     });
 }));
-const getUsersOrderHistory = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { id } = req.params;
-    const orders = yield order_service_1.OrderService.getUsersOrderHistory(id);
+const getUserUnconfirmOrder = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { email } = req.user;
+    const orders = yield order_service_1.OrderService.getUserUnConfirmOrder(email);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: 200,
-        message: "Order History retrieved successfully",
+        message: "Order retrieved successfully",
+        data: orders,
+    });
+}));
+const updateOrderStatus = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { userId } = req.user;
+    const orders = yield order_service_1.OrderService.updateOrder(userId, req.body);
+    (0, sendResponse_1.default)(res, {
+        success: true,
+        statusCode: 200,
+        message: "Order updated successfully",
         data: orders,
     });
 }));
@@ -49,10 +78,7 @@ exports.OrderController = {
     createOrder,
     getVendorOrderHistory,
     getUsersOrderHistory,
-    //   getAllCategories,
-    //   createCustomer,
-    // getAllFromDB,
-    // changeProfileStatus,
-    // getMyProfile,
-    // updateMyProfie
+    getAllOrderHistory,
+    getUserUnconfirmOrder,
+    updateOrderStatus,
 };

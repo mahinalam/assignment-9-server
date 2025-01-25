@@ -1,6 +1,5 @@
-import { Category, Shop, UserRole } from "@prisma/client";
+import { FollowingShop, Shop } from "@prisma/client";
 import prisma from "../../../sharred/prisma";
-import ApiError from "../../errors/ApiError";
 import { JwtPayload } from "jsonwebtoken";
 import { TImageFile } from "../../interfaces/file";
 
@@ -18,8 +17,13 @@ const getAllShop = async () => {
   return result;
 };
 
-const createShopIntoDB = async (payload: Shop, image: TImageFile) => {
+const createShopIntoDB = async (
+  vendorId: string,
+  payload: Shop,
+  image: TImageFile
+) => {
   payload.logo = image.path;
+  payload.ownerId = vendorId;
 
   const result = await prisma.shop.create({
     data: payload,
@@ -29,17 +33,6 @@ const createShopIntoDB = async (payload: Shop, image: TImageFile) => {
 };
 
 const getVendorShop = async (user: JwtPayload) => {
-  // const email = await prisma.user.findFirst({
-  //   where: {
-  //     email: req.email
-  //   }
-  // })
-  // const isUser = await prisma.user.findFirst({
-  //   where: {
-  //     email: user.email,
-  //   },
-  // });
-  console.log("from service user", user);
   const result = await prisma.user.findUnique({
     where: {
       id: user.userId,
@@ -65,7 +58,15 @@ const getVendorShop = async (user: JwtPayload) => {
       },
     },
   });
-  console.log("result", result);
+
+  return result;
+};
+
+const followShop = async (followerId: string, shopId: string) => {
+  const result = await prisma.followingShop.create({
+    data: { followerId, shopId },
+  });
+
   return result;
 };
 
@@ -73,5 +74,5 @@ export const ShopService = {
   getAllShop,
   createShopIntoDB,
   getVendorShop,
-  //   createCustomer,
+  followShop,
 };

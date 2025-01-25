@@ -10,19 +10,7 @@ import { PaymentRoute } from "../modules/Payment/payment.route";
 import { FollowingShopRoute } from "../modules/FollowingShop/followingShop.route";
 import { BrandRoute } from "../modules/Brand/brand.route";
 import { CouponRoute } from "../modules/Coupon/coupon.route";
-// import { userRoutes } from "../modules/User/user.routes";
-// import { AdminRoutes } from "../modules/Admin/admin.routes";
-// import { AuthRoutes } from "../modules/Auth/auth.routes";
-// import { SpecialtiesRoutes } from "../modules/Specialties/specialties.routes";
-// import { DoctorRoutes } from "../modules/Doctor/doctor.routes";
-// import { PatientRoutes } from "../modules/Patient/patient.route";
-// import { ScheduleRoutes } from "../modules/Schedule/schedule.routes";
-// import { DoctorScheduleRoutes } from "../modules/DoctorSchedule/doctorSchedule.routes";
-// import { AppointmentRoutes } from "../modules/Appointment/appointment.routes";
-// import { PaymentRoutes } from "../modules/Payment/payment.routes";
-// import { PrescriptionRoutes } from "../modules/Prescription/prescription.routes";
-// import { ReviewRoutes } from "../modules/Review/review.routes";
-// import { MetaRoutes } from "../modules/Meta/meta.routes";
+import { CartRoute } from "../modules/Cart/cart.route";
 
 const router = express.Router();
 
@@ -60,16 +48,16 @@ const moduleRoutes = [
     route: PaymentRoute,
   },
   {
-    path: "/following-shop",
-    route: FollowingShopRoute,
-  },
-  {
     path: "/brand",
     route: BrandRoute,
   },
   {
     path: "/coupon",
     route: CouponRoute,
+  },
+  {
+    path: "/cart",
+    route: CartRoute,
   },
 ];
 

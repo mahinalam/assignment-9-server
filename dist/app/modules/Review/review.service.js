@@ -14,25 +14,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ReviewService = void 0;
 const prisma_1 = __importDefault(require("../../../sharred/prisma"));
-// get all product specific reviews from db
-// const getProductSpecificReviews = async (productId: string) => {
-//   await prisma.product.findUniqueOrThrow({
-//     where: {
-//       id: productId,
-//       isDeleted: false,
-//     },
-//   });
-//   const result = await prisma.review.findMany({
-//     where: {
-//       productId,
-//       isDeleted: false,
-//     },
-//     // include: {
-//     //   user: true,
-//     // },
-//   });
-//   return result;
-// };
 // / get all product specific reviews from db
 const getProductSpecificReviews = (productId) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield prisma_1.default.product.findUniqueOrThrow({
@@ -58,8 +39,8 @@ const getProductSpecificReviews = (productId) => __awaiter(void 0, void 0, void 
     const averageRating = totalReviews > 0 ? totalRating / totalReviews : 0;
     return {
         reviews,
-        reviewCounts, // Counts of reviews per rating
-        averageRating, // Average rating for the product
+        reviewCounts,
+        averageRating,
     };
 });
 const getAllVendorProductsReviews = (ownerId) => __awaiter(void 0, void 0, void 0, function* () {
@@ -112,13 +93,14 @@ const getUserProductReview = (userId) => __awaiter(void 0, void 0, void 0, funct
     });
     return vendorProducts;
 });
-const createReviewIntoDB = (payload, images) => __awaiter(void 0, void 0, void 0, function* () {
+const createReviewIntoDB = (userId, payload, images) => __awaiter(void 0, void 0, void 0, function* () {
     if (images && images.reviewImages.length > 0) {
         payload.images = images.reviewImages.map((image) => image.path);
     }
     else {
         payload.images = [];
     }
+    payload.userId = userId;
     const result = yield prisma_1.default.review.create({
         data: payload,
     });
@@ -129,5 +111,4 @@ exports.ReviewService = {
     createReviewIntoDB,
     getProductSpecificReviews,
     getUserProductReview,
-    //   createCustomer,
 };

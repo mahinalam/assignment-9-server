@@ -19,10 +19,11 @@ const shop_service_1 = require("./shop.service");
 const ApiError_1 = __importDefault(require("../../errors/ApiError"));
 // import { CategoryService } from "./category.service";
 const createShop = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { userId } = req.user;
     if (!req.file) {
         throw new ApiError_1.default(400, "Please upload an image");
     }
-    const result = yield shop_service_1.ShopService.createShopIntoDB(req.body, req.file);
+    const result = yield shop_service_1.ShopService.createShopIntoDB(userId, req.body, req.file);
     (0, sendResponse_1.default)(res, {
         statusCode: 200,
         success: true,
@@ -49,13 +50,19 @@ const getAllShop = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, voi
         data: result,
     });
 }));
+const followShop = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { userId } = req.user;
+    const result = yield shop_service_1.ShopService.followShop(userId, req.body.shopId);
+    (0, sendResponse_1.default)(res, {
+        statusCode: 200,
+        success: true,
+        message: "Successfully Followed Shop!",
+        data: result,
+    });
+}));
 exports.ShopController = {
     createShop,
     getVendorShop,
     getAllShop,
-    //   createCustomer,
-    // getAllFromDB,
-    // changeProfileStatus,
-    // getMyProfile,
-    // updateMyProfie
+    followShop,
 };

@@ -1,15 +1,13 @@
-import { Request, RequestHandler, Response } from "express";
-import { UserRole } from "@prisma/client";
-import { JwtPayload } from "jsonwebtoken";
+import { Request, Response } from "express";
 import catchAsync from "../../../sharred/catchAsync";
 import sendResponse from "../../../sharred/sendResponse";
-import prisma from "../../../sharred/prisma";
-import ApiError from "../../errors/ApiError";
-import { TImageFile, TImageFiles } from "../../interfaces/file";
+import { TImageFiles } from "../../interfaces/file";
 import { ReviewService } from "./review.service";
 
 const createReview = catchAsync(async (req: Request, res: Response) => {
+  const { userId } = req.user;
   const result = await ReviewService.createReviewIntoDB(
+    userId,
     req.body,
     req.files as TImageFiles
   );
@@ -62,9 +60,4 @@ export const ReviewController = {
   getProductSpecificReviews,
   getVendorProductsReviews,
   getUserProductReview,
-  //   createCustomer,
-  // getAllFromDB,
-  // changeProfileStatus,
-  // getMyProfile,
-  // updateMyProfie
 };

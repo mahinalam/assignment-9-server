@@ -26,25 +26,15 @@ const getAllShop = () => __awaiter(void 0, void 0, void 0, function* () {
     });
     return result;
 });
-const createShopIntoDB = (payload, image) => __awaiter(void 0, void 0, void 0, function* () {
+const createShopIntoDB = (vendorId, payload, image) => __awaiter(void 0, void 0, void 0, function* () {
     payload.logo = image.path;
+    payload.ownerId = vendorId;
     const result = yield prisma_1.default.shop.create({
         data: payload,
     });
     return result;
 });
 const getVendorShop = (user) => __awaiter(void 0, void 0, void 0, function* () {
-    // const email = await prisma.user.findFirst({
-    //   where: {
-    //     email: req.email
-    //   }
-    // })
-    // const isUser = await prisma.user.findFirst({
-    //   where: {
-    //     email: user.email,
-    //   },
-    // });
-    console.log("from service user", user);
     const result = yield prisma_1.default.user.findUnique({
         where: {
             id: user.userId,
@@ -70,12 +60,17 @@ const getVendorShop = (user) => __awaiter(void 0, void 0, void 0, function* () {
             },
         },
     });
-    console.log("result", result);
+    return result;
+});
+const followShop = (followerId, shopId) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield prisma_1.default.followingShop.create({
+        data: { followerId, shopId },
+    });
     return result;
 });
 exports.ShopService = {
     getAllShop,
     createShopIntoDB,
     getVendorShop,
-    //   createCustomer,
+    followShop,
 };

@@ -34,12 +34,18 @@ const getAllCategories = (0, catchAsync_1.default)((req, res) => __awaiter(void 
         data: categories,
     });
 }));
+const getSingleCategory = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { categoryId } = req.params;
+    const category = yield category_service_1.CategoryService.getSingleCategory(categoryId);
+    (0, sendResponse_1.default)(res, {
+        success: true,
+        statusCode: 200,
+        message: "Category retrieved successfully",
+        data: category,
+    });
+}));
 exports.CategoryController = {
     createCategory,
     getAllCategories,
-    //   createCustomer,
-    // getAllFromDB,
-    // changeProfileStatus,
-    // getMyProfile,
-    // updateMyProfie
+    getSingleCategory,
 };

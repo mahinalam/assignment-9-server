@@ -17,7 +17,8 @@ const catchAsync_1 = __importDefault(require("../../../sharred/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../../sharred/sendResponse"));
 const review_service_1 = require("./review.service");
 const createReview = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield review_service_1.ReviewService.createReviewIntoDB(req.body, req.files);
+    const { userId } = req.user;
+    const result = yield review_service_1.ReviewService.createReviewIntoDB(userId, req.body, req.files);
     (0, sendResponse_1.default)(res, {
         statusCode: 200,
         success: true,
@@ -60,9 +61,4 @@ exports.ReviewController = {
     getProductSpecificReviews,
     getVendorProductsReviews,
     getUserProductReview,
-    //   createCustomer,
-    // getAllFromDB,
-    // changeProfileStatus,
-    // getMyProfile,
-    // updateMyProfie
 };

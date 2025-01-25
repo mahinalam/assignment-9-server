@@ -23,11 +23,10 @@ model User {
   isDeleted    Boolean    @default(false)
 
   shop   Shop?
-  order  Order[]
   review Review[]
 
   followingShop FollowingShop[]
-  Cart          Cart?
+  cart          Cart?
 
   @@map("users")
 }
@@ -46,8 +45,8 @@ model Shop {
   owner         User            @relation(fields: [ownerId], references: [id])
   products      Product[]
   followingShop FollowingShop[]
-  Order         Order[]
-  Cart          Cart[]
+  order         Order[]
+  cart          Cart[]
 }
 
 model Category {
@@ -70,7 +69,7 @@ model Brand {
   isDeleted   Boolean   @default(false)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  Product     Product[]
+  product     Product[]
 
   @@map("brands")
 }
@@ -96,51 +95,53 @@ model Product {
   category    Category    @relation(fields: [categoryId], references: [id])
   orderItem   OrderItem[]
   review      Review[]
-  CartItem    CartItem[]
+  cartItem    CartItem[]
 
   @@map("products")
 }
 
 model Cart {
-  id            String     @id @default(uuid())
-  userId        String     @unique
-  user          User       @relation(fields: [userId], references: [id])
-  shopId        String
-  shop          Shop       @relation(fields: [shopId], references: [id])
-  totalQuantity Float
-  totalAmount   Float
-  CartItem      CartItem[]
+  id         String   @id @default(uuid())
+  customerId String   @unique
+  shopId     String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  @@unique([userId, shopId])
+  customer  User       @relation(fields: [customerId], references: [id])
+  shop      Shop       @relation(fields: [shopId], references: [id])
+  cartItems CartItem[]
 }
 
 model CartItem {
+  id        String   @id @default(uuid())
   cartId    String
-  cart      Cart    @relation(fields: [cartId], references: [id])
   productId String
-  product   Product @relation(fields: [productId], references: [id])
-  quantity  Float
+  quantity  Int      @default(1)
   price     Float
-
-  @@id([cartId, productId])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  cart      Cart     @relation(fields: [cartId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
 }
 
 model Order {
-  id              String        @id @default(uuid())
-  status          OrderStatus   @default(PENDING)
-  totalPrice      Float
-  shippingAddress String
-  transactionId   String        @unique
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  isDeleted       Boolean       @default(false)
-  userId          String
-  user            User          @relation(fields: [userId], references: [id])
-  shopId          String
-  shop            Shop          @relation(fields: [shopId], references: [id])
-  orderItems      OrderItem[]
-  payment         Payment?
-  paymentStatus   PaymentStatus @default(PENDING)
+  id                      String        @id @default(uuid())
+  status                  OrderStatus   @default(PENDING)
+  totalPrice              Float
+  transactionId           String        @unique
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
+  isDeleted               Boolean       @default(false)
+  customerEmail           String        @unique
+  customerName            String
+  customerPhone           String
+  customerShippingAddress String
+  shopId                  String
+  shop                    Shop          @relation(fields: [shopId], references: [id])
+  orderItems              OrderItem[]
+  payment                 Payment?
+  paymentStatus           PaymentStatus @default(PENDING)
+  orderStatus             OrderStatus   @default(PENDING)
 }
 
 model OrderItem {

@@ -7,6 +7,6 @@ exports.productFilterableFields = [
     "rating",
     "priceMax",
     "priceMin",
-    "brand",
-    "category",
+    "brandId",
+    "categoryId",
 ];

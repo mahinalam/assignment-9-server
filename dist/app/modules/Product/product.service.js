@@ -8,17 +8,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -27,259 +16,191 @@ exports.ProductService = void 0;
 const prisma_1 = __importDefault(require("../../../sharred/prisma"));
 const paginationHelper_1 = require("../../../helpers/paginationHelper");
 const product_constant_1 = require("./product.constant");
-// get all products from db
-// const getAllProductsFromDB = async (params: {
-//   searchTerms?: string[];
-//   sortBy?: "name" | "price";
-//   sortOrder?: "asc" | "desc";
-// }) => {
-//   // const andOptions = Prisma.AdminWhereInput[]
-//   const { searchTerms, sortBy = 'name', sortOrder = 'asc' } = params;
-// //   const result = await prisma.product.findMany({
-// //     where: {
-// //       isDeleted: false,
-// //     },
-// //     include: {
-// //       review: true,
-// //     },
-// //   });
-// //   console.log(result);
-// //   return result;
-// const result = await prisma.product.findMany({
-//   where: {
-//     isDeleted: false,
-//     AND: searchTerms?.length ? [
-//       {OR: searchTerms?.map((term) => ({
-//         name: {
-//           contains: term,
-//           mode: 'insensitive'
-//         }
-//       }))}
-//     ]
-//   }
-// })
-// };
-// const getAllProductsFromDB = async (params: {
-//   searchTerms?: string[];  // searchTerms is now an array of strings
-//   sortBy?: 'name' | 'price';
-//   sortOrder?: 'asc' | 'desc';
-//   searchFields?: string[];  // Optional: allows dynamic search on different fields
-// }) => {
-//   const { searchTerms, sortBy = 'name', sortOrder = 'asc', searchFields = ['name', 'description'] } = params;
-//   // Generate search conditions for each field
-//   const searchConditions = searchFields.flatMap((field) =>
-//     searchTerms?.map((term) => ({
-//       [field]: {
-//         contains: term,
-//         mode: 'insensitive',  // Case-insensitive search
-//       },
-//     }))
-//   );
-//   const result = await prisma.product.findMany({
-//     where: {
-//       isDeleted: false,
-//       AND: searchTerms?.length ? { OR: searchConditions } : [],
-//     },
-//     orderBy: {
-//       [sortBy]: sortOrder,  // Sorting by name or price
-//     },
-//     include: {
-//       review: true,
-//     },
-//   });
-//   console.log(result);
-//   return result;
-// };
-// /** @type {import('tailwindcss').Config} */
-// module.exports = {
-//   content: [
-//     './components/**/*.{js,ts,jsx,tsx,mdx}',
-//     './app/**/*.{js,ts,jsx,tsx,mdx}',
-//     './node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}'
-//   ],
-//   theme: {
-//     extend: {
-//       fontFamily: {
-//         sans: ["var(--font-sans)"],
-//         mono: ["var(--font-mono)"],
-//       },
-//     },
-//   },
-//   darkMode: "class",
-//   plugins: [require('@nextui-org/theme')], // Use 'require' to properly add the plugin
-// }
-// const getAllProductsFromDB = async (params: {
-//   searchTerms?: string[]; // searchTerms is now an array of strings
-//   sortBy?: "name" | "newPrice";
-//   sortOrder?: "asc" | "desc";
-//   searchFields?: string[]; // Optional: allows dynamic search on different fields
-// }) => {
-//   const {
-//     searchTerms,
-//     sortBy = "name",
-//     sortOrder = "asc",
-//     searchFields = ["name", "description"],
-//   } = params;
-//   // Generate search conditions for each field
-//   const searchConditions = searchFields.flatMap(
-//     (field) =>
-//       searchTerms?.map((term) => ({
-//         [field]: {
-//           contains: term,
-//           mode: "insensitive", // Case-insensitive search
-//         },
-//       })) ?? [] // Ensure the result is never undefined
-//   );
-//   const result = await prisma.product.findMany({
-//     where: {
-//       isDeleted: false,
-//       AND: searchTerms?.length ? { OR: searchConditions.filter(Boolean) } : [],
-//     },
-//     orderBy: {
-//       [sortBy]: sortOrder, // Sorting by name or price
-//     },
-//     include: {
-//       review: true,
-//     },
-//   });
-//   return result;
-// };
-// const getAllProductsFromDB = async (params: {
-//   searchTerms?: string[]; // searchTerms is now an array of strings
-//   sortBy?: "name" | "newPrice";
-//   sortOrder?: "asc" | "desc";
-//   searchFields?: string[]; // Optional: allows dynamic search on different fields
-// }) => {
-//   const {
-//     searchTerms,
-//     sortBy = "name",
-//     sortOrder = "asc",
-//     searchFields = ["name", "description"],
-//   } = params;
-//   // Generate search conditions for each field
-//   const searchConditions = searchFields.flatMap(
-//     (field) =>
-//       searchTerms?.map((term) => ({
-//         [field]: {
-//           contains: term,
-//           mode: "insensitive", // Case-insensitive search
-//         },
-//       })) ?? [] // Ensure the result is never undefined
-//   );
-//   const result = await prisma.product.findMany({
-//     where: {
-//       isDeleted: false,
-//       AND: searchTerms?.length ? { OR: searchConditions.filter(Boolean) } : [],
-//     },
-//     orderBy: {
-//       [sortBy]: sortOrder, // Sorting by name or price
-//     },
-//     include: {
-//       review: true,
-//     },
-//   });
-//   console.log(result);
-//   return result;
-// };
-// const getAllProductsFromDB = async () => {
-//   const result = await prisma.product.findMany({
-//     include: {
-//       category: true,
-//       shop: true,
-//       brand: true,
-//     },
-//   });
-//   return result;
-// };
-//   const { limit, page, skip } = paginationHelper.calculatePagination(options);
-//   const { searchTerm, rating, priceMax, priceMin, brand } = filters;
-//   console.log({ searchTerm, rating, priceMax, priceMin, brand });
-//   const andConditions = [];
-//   if (searchTerm) {
-//     andConditions.push({
+// const getAllProductsFromDB = async (
+//   fieldParams: any,
+//   paginationOption: any
+// ) => {
+//   const { limit, page, skip, sortBy, sortOrder } =
+//     paginationHelper.calculatePagination(paginationOption);
+//   const { searchTerm, ...filterData } = fieldParams;
+//   console.log("from service", filterData);
+//   const andCondition: Prisma.ProductWhereInput[] = [];
+//   // search params
+//   if (fieldParams.searchTerm) {
+//     andCondition.push({
 //       OR: productSearchAbleFields.map((field) => ({
 //         [field]: {
-//           contains: searchTerm,
+//           contains: fieldParams.searchTerm,
 //           mode: "insensitive",
 //         },
 //       })),
 //     });
 //   }
-//   if (rating) {
-//     andConditions.push({
-//       review: {
-//         some: {
-//           rating: {
-//             gte: rating, // Minimum rating
-//           },
+//   // specific field
+//   if (Object.keys(filterData)?.length > 0) {
+//     andCondition.push({
+//       AND: Object.keys(filterData).map((key) => ({
+//         [key]: {
+//           equals: filterData[key],
 //         },
-//       },
+//       })),
 //     });
 //   }
-//   if (priceMin) {
-//     andConditions.push({
-//       newPrice: {
-//         gte: priceMin, // Minimum price
-//       },
-//     });
-//   }
-//   // Filter by maximum price
-//   if (priceMax) {
-//     andConditions.push({
-//       newPrice: {
-//         lte: priceMax, // Maximum price
-//       },
-//     });
-//   }
-//   console.log({ andConditions });
-//   const whereConditions =
-//     andConditions.length > 0 ? { AND: andConditions } : {};
+//   const whereCondition: Prisma.ProductWhereInput = { AND: andCondition };
 //   const result = await prisma.product.findMany({
-//     where: whereConditions,
-//     skip,
+//     where: whereCondition,
+//     skip: skip,
 //     take: limit,
-//     orderBy:
-//       options.sortBy && options.sortOrder
-//         ? { [options.sortBy]: options.sortOrder }
-//         : { createdAt: "desc" },
 //     include: {
 //       review: true,
-//       brand: true,
 //     },
 //   });
-//   return result;
+//   const total = await prisma.product.count({
+//     where: whereCondition,
+//   });
+//   return {
+//     meta: {
+//       page,
+//       limit,
+//       total,
+//     },
+//     data: result,
+//   };
+// };
+// const getAllProductsFromDB = async (
+//   rating,
+//   brandId,
+//   categoryId,
+//   priceMin,
+//   priceMax,
+//   searchTerm,
+//   sortOrder,
+//   page,
+//   limit
+// ) => {
+//   // const products = await prisma.product.findMany({
+//   //   where: {
+//   //     AND: [
+//   //       brandId ? { brandId } : {},
+//   //       categoryId ? { categoryId } : {},
+//   //       priceMin || priceMax
+//   //         ? {
+//   //             newPrice: {
+//   //               gte: priceMin || undefined,
+//   //               lte: priceMax || undefined,
+//   //             },
+//   //           }
+//   //         : {},
+//   //       rating
+//   //         ? {
+//   //             review: {
+//   //               some: {
+//   //                 rating: {
+//   //                   gte: rating,
+//   //                 },
+//   //               },
+//   //             },
+//   //           }
+//   //         : {},
+//   //       searchTerm
+//   //         ? {
+//   //             OR: [
+//   //               {
+//   //                 name: {
+//   //                   contains: searchTerm,
+//   //                   mode: "insensitive", // Case-insensitive search
+//   //                 },
+//   //               },
+//   //               {
+//   //                 description: {
+//   //                   contains: searchTerm,
+//   //                   mode: "insensitive",
+//   //                 },
+//   //               },
+//   //             ],
+//   //           }
+//   //         : {},
+//   //     ],
+//   //   },
+//   //   include: {
+//   //     category: true,
+//   //     review: true,
+//   //     brand: true,
+//   //   },
+//   // });
+//   const whereInput = [];
+//   if()
+//   return products;
 // };
 const getAllProductsFromDB = (fieldParams, paginationOption) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
     const { limit, page, skip, sortBy, sortOrder } = paginationHelper_1.paginationHelper.calculatePagination(paginationOption);
-    const { searchTerm } = fieldParams, filterData = __rest(fieldParams, ["searchTerm"]);
+    const { searchTerm, priceMin, priceMax, rating, brandId, categoryId } = fieldParams;
     const andCondition = [];
-    // search params
-    if (fieldParams.searchTerm) {
+    // Search functionality
+    if (searchTerm) {
         andCondition.push({
             OR: product_constant_1.productSearchAbleFields.map((field) => ({
                 [field]: {
-                    contains: fieldParams.searchTerm,
+                    contains: searchTerm,
                     mode: "insensitive",
                 },
             })),
         });
     }
-    // specific field
-    if (((_a = Object.keys(filterData)) === null || _a === void 0 ? void 0 : _a.length) > 0) {
+    // Filter by specific fields
+    if (priceMin || priceMax) {
         andCondition.push({
-            AND: Object.keys(filterData).map((key) => ({
-                [key]: {
-                    equals: filterData[key],
-                },
-            })),
+            AND: [
+                priceMin ? { newPrice: { gte: parseInt(priceMin, 10) } } : {},
+                priceMax ? { newPrice: { lte: parseInt(priceMax, 10) } } : {},
+            ],
         });
     }
-    const whereCondition = { AND: andCondition };
+    if (rating) {
+        andCondition.push({
+            review: {
+                some: {
+                    rating: {
+                        gte: parseInt(rating, 10),
+                    },
+                },
+            },
+        });
+    }
+    if (brandId) {
+        andCondition.push({ brandId: brandId });
+    }
+    if (categoryId) {
+        andCondition.push({ categoryId });
+    }
+    // // Add any additional filters from fieldParams
+    // if (Object.keys(otherFilters)?.length > 0) {
+    //   andCondition.push({
+    //     AND: Object.keys(otherFilters).map((key) => ({
+    //       [key]: {
+    //         equals: otherFilters[key],
+    //       },
+    //     })),
+    //   });
+    // }
+    // Combine all conditions
+    const whereCondition = {
+        AND: andCondition,
+    };
+    // Query database
     const result = yield prisma_1.default.product.findMany({
         where: whereCondition,
         skip: skip,
         take: limit,
+        include: {
+            review: true,
+            brand: true,
+            category: true,
+            shop: true,
+        },
+        orderBy: {
+            [sortBy || "createdAt"]: sortOrder || "desc",
+        },
     });
     const total = yield prisma_1.default.product.count({
         where: whereCondition,
@@ -313,34 +234,6 @@ const getVendorShopProductsFromDB = (shopId) => __awaiter(void 0, void 0, void 0
             products: true,
             followingShop: true,
         },
-        // select: {
-        //   id: true,
-        //   address: true,
-        //   description: true,
-        //   logo: true,
-        //   name: true,
-        //   ownerId: true,
-        //   products: {
-        //     select: {
-        //       id: true,
-        //       category: true,
-        //       images: true,
-        //       name: true,
-        //       newPrice: true,
-        //       oldPrice: true,
-        //       disCounts: true,
-        //       review: {
-        //         select: {
-        //           id: true,
-        //           images: true,
-        //           rating: true,
-        //           user: true,
-        //           comment: true,
-        //         },
-        //       },
-        //     },
-        //   },
-        // },
     });
     return result;
 });

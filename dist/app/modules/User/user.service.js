@@ -47,6 +47,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserService = void 0;
 const bcrypt = __importStar(require("bcrypt"));
+const client_1 = require("@prisma/client");
 const prisma_1 = __importDefault(require("../../../sharred/prisma"));
 const ApiError_1 = __importDefault(require("../../errors/ApiError"));
 const createUserIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function* () {
@@ -69,7 +70,6 @@ const createUserIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function
             email: true,
             name: true,
             address: true,
-            order: true,
             phoneNumber: true,
             role: true,
             shop: true,
@@ -91,9 +91,144 @@ const getSingleUserFromDB = (id) => __awaiter(void 0, void 0, void 0, function* 
         },
         include: {
             shop: true,
-            order: true,
             review: true,
+            followingShop: {
+                include: {
+                    shop: true,
+                },
+            },
         },
+    });
+    return result;
+});
+// admin stats
+const getAdminStats = () => __awaiter(void 0, void 0, void 0, function* () {
+    const products = yield prisma_1.default.product.count();
+    const orders = yield prisma_1.default.orderItem.count();
+    const payments = yield prisma_1.default.order.count({
+        where: {
+            paymentStatus: "COMPLETED",
+        },
+    });
+    const shops = yield prisma_1.default.shop.count();
+    const category = yield prisma_1.default.category.count();
+    const result = {
+        products,
+        orders,
+        payments,
+        shops,
+        category,
+    };
+    return result;
+});
+// vendor stats
+const getVendorStats = (vendorId) => __awaiter(void 0, void 0, void 0, function* () {
+    // Fetch vendor-specific counts
+    const [orderCount, completedPaymentsCount, followerCount, productCount] = yield Promise.all([
+        // Total orders for this vendor's shop
+        prisma_1.default.order.count({
+            where: {
+                shop: {
+                    ownerId: vendorId,
+                },
+            },
+        }),
+        // Total completed payments for this vendor's shop
+        prisma_1.default.order.count({
+            where: {
+                shop: {
+                    ownerId: vendorId,
+                },
+                paymentStatus: "COMPLETED",
+            },
+        }),
+        // Total followers for this vendor's shop
+        prisma_1.default.followingShop.count({
+            where: {
+                shop: {
+                    ownerId: vendorId,
+                },
+            },
+        }),
+        // Total products in the vendor's shop
+        prisma_1.default.product.count({
+            where: {
+                shop: {
+                    ownerId: vendorId,
+                },
+            },
+        }),
+    ]);
+    // Return the counts
+    return {
+        totalOrders: orderCount,
+        totalCompletedPayments: completedPaymentsCount,
+        totalFollowers: followerCount,
+        totalProducts: productCount,
+    };
+});
+// user stats
+const getUserStats = (customerEmail) => __awaiter(void 0, void 0, void 0, function* () {
+    // Fetch user-specific counts using customerEmail
+    const [orderCount, followedShopsCount, reviewCount, cartItemsCount] = yield Promise.all([
+        // Total orders placed by the user (customerEmail)
+        prisma_1.default.order.count({
+            where: {
+                customerEmail: customerEmail,
+            },
+        }),
+        // Total shops followed by the user (customerEmail)
+        prisma_1.default.followingShop.count({
+            where: {
+                user: {
+                    email: customerEmail,
+                },
+            },
+        }),
+        // Total reviews written by the user (customerEmail)
+        prisma_1.default.review.count({
+            where: {
+                user: {
+                    email: customerEmail,
+                },
+            },
+        }),
+        // Total cart items for the user (customerEmail)
+        prisma_1.default.cartItem.count({
+            where: {
+                cart: {
+                    customer: {
+                        email: customerEmail,
+                    },
+                },
+            },
+        }),
+    ]);
+    // Return the counts
+    return {
+        totalOrders: orderCount,
+        totalFollowedShops: followedShopsCount,
+        totalReviews: reviewCount,
+        totalCartItems: cartItemsCount,
+    };
+});
+const updateMyProfile = (user, image) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("from backend user", user);
+    console.log("from backend image", image);
+    const userInfo = yield prisma_1.default.user.findUniqueOrThrow({
+        where: {
+            email: user.email,
+            status: client_1.UserStatus.ACTIVE,
+        },
+    });
+    if (image) {
+        user.profilePhoto = image.path;
+    }
+    const result = yield prisma_1.default.user.update({
+        where: {
+            email: userInfo.email,
+        },
+        data: user,
     });
     return result;
 });
@@ -101,4 +236,8 @@ exports.UserService = {
     getAllUsersFromDB,
     createUserIntoDB,
     getSingleUserFromDB,
+    updateMyProfile,
+    getAdminStats,
+    getVendorStats,
+    getUserStats,
 };

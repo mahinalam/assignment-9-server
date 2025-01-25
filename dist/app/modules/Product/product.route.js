@@ -10,25 +10,13 @@ const multer_config_1 = require("../../../config/multer.config");
 const validateImageFileRequest_1 = __importDefault(require("../../middlewares/validateImageFileRequest"));
 const image_validation_1 = require("../../zod/image.validation");
 const bodyParser_1 = require("../../middlewares/bodyParser");
+const client_1 = require("@prisma/client");
+const auth_1 = __importDefault(require("../../middlewares/auth"));
 const router = express_1.default.Router();
-router.get("/", 
-// auth(UserRole.ADMIN),
-product_controller_1.ProductController.getAllProducts);
-router.get("/:id", 
-// auth(UserRole.ADMIN),
-product_controller_1.ProductController.getSingleProductFromDB);
-router.post("/", 
-// auth(UserRole.VENDOR),
-multer_config_1.multerUpload.fields([{ name: "itemImages" }]), 
-// multerUpload.fields([{ name: 'itemImages' }]),
-(0, validateImageFileRequest_1.default)(image_validation_1.ImageFilesArrayZodSchema), bodyParser_1.parseBody, product_controller_1.ProductController.createProduct);
-router.get("/vendor-products/:id", 
-// auth(UserRole.ADMIN),
-product_controller_1.ProductController.getAllVendorProducts);
-router.patch("/:id", 
-// auth(UserRole.ADMIN),
-product_controller_1.ProductController.updateVendorShopProduct);
-router.delete("/:id", 
-// auth(UserRole.ADMIN),
-product_controller_1.ProductController.deleteVendorShopProduct);
+router.get("/", product_controller_1.ProductController.getAllProducts);
+router.get("/:id", product_controller_1.ProductController.getSingleProductFromDB);
+router.post("/", (0, auth_1.default)(client_1.UserRole.VENDOR, client_1.UserRole.ADMIN), multer_config_1.multerUpload.fields([{ name: "itemImages" }]), (0, validateImageFileRequest_1.default)(image_validation_1.ImageFilesArrayZodSchema), bodyParser_1.parseBody, product_controller_1.ProductController.createProduct);
+router.get("/vendor-products/:id", product_controller_1.ProductController.getAllVendorProducts);
+router.patch("/:id", (0, auth_1.default)(client_1.UserRole.ADMIN, client_1.UserRole.VENDOR), product_controller_1.ProductController.updateVendorShopProduct);
+router.delete("/:id", (0, auth_1.default)(client_1.UserRole.ADMIN, client_1.UserRole.VENDOR), product_controller_1.ProductController.deleteVendorShopProduct);
 exports.ProductRoute = router;

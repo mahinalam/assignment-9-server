@@ -24,8 +24,16 @@ const getAllCategoriesFromDB = () => __awaiter(void 0, void 0, void 0, function*
     const result = yield prisma_1.default.category.findMany();
     return result;
 });
+const getSingleCategory = (categoryId) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield prisma_1.default.category.findUniqueOrThrow({
+        where: {
+            id: categoryId,
+        },
+    });
+    return result;
+});
 exports.CategoryService = {
     createCategoryIntoDB,
     getAllCategoriesFromDB,
-    //   createCustomer,
+    getSingleCategory,
 };

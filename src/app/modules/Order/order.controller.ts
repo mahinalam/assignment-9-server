@@ -1,11 +1,6 @@
-import { Request, RequestHandler, Response } from "express";
-import { UserRole } from "@prisma/client";
-import { JwtPayload } from "jsonwebtoken";
+import { Request, Response } from "express";
 import catchAsync from "../../../sharred/catchAsync";
 import sendResponse from "../../../sharred/sendResponse";
-import prisma from "../../../sharred/prisma";
-import ApiError from "../../errors/ApiError";
-import { TImageFile } from "../../interfaces/file";
 import { OrderService } from "./order.service";
 
 const createOrder = catchAsync(async (req: Request, res: Response) => {
@@ -20,8 +15,31 @@ const createOrder = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getVendorOrderHistory = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const orders = await OrderService.getVendorOrderHistory(id);
+  const { userId } = req.user;
+  const orders = await OrderService.getVendorOrderHistory(userId);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    message: "Vendor Order History retrieved successfully",
+    data: orders,
+  });
+});
+
+const getUsersOrderHistory = catchAsync(async (req, res) => {
+  const { email } = req.user;
+  const orders = await OrderService.getUsersOrderHistory(email);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    message: "User Order History retrieved successfully",
+    data: orders,
+  });
+});
+
+const getAllOrderHistory = catchAsync(async (req, res) => {
+  const orders = await OrderService.getAllOrderHistory();
 
   sendResponse(res, {
     success: true,
@@ -31,14 +49,26 @@ const getVendorOrderHistory = catchAsync(async (req, res) => {
   });
 });
 
-const getUsersOrderHistory = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const orders = await OrderService.getUsersOrderHistory(id);
+const getUserUnconfirmOrder = catchAsync(async (req, res) => {
+  const { email } = req.user;
+  const orders = await OrderService.getUserUnConfirmOrder(email);
 
   sendResponse(res, {
     success: true,
     statusCode: 200,
-    message: "Order History retrieved successfully",
+    message: "Order retrieved successfully",
+    data: orders,
+  });
+});
+
+const updateOrderStatus = catchAsync(async (req, res) => {
+  const { userId } = req.user;
+  const orders = await OrderService.updateOrder(userId, req.body);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    message: "Order updated successfully",
     data: orders,
   });
 });
@@ -47,10 +77,7 @@ export const OrderController = {
   createOrder,
   getVendorOrderHistory,
   getUsersOrderHistory,
-  //   getAllCategories,
-  //   createCustomer,
-  // getAllFromDB,
-  // changeProfileStatus,
-  // getMyProfile,
-  // updateMyProfie
+  getAllOrderHistory,
+  getUserUnconfirmOrder,
+  updateOrderStatus,
 };

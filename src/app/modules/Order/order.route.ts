@@ -5,22 +5,34 @@ import { OrderController } from "./order.controller";
 
 const router = express.Router();
 
-router.post(
-  "/",
-  //   auth(UserRole.ADMIN),
-  OrderController.createOrder
-);
+router.post("/", auth(UserRole.USER), OrderController.createOrder);
 
 router.get(
-  "/:id",
-  // auth(UserRole.ADMIN),
+  "/vendor-order-history",
+  auth(UserRole.VENDOR),
   OrderController.getVendorOrderHistory
 );
 
 router.get(
-  "/order-history/:id",
-  // auth(UserRole.ADMIN),
+  "/user-order-history",
+  auth(UserRole.USER),
   OrderController.getUsersOrderHistory
+);
+
+router.get(
+  "/order-history",
+  auth(UserRole.ADMIN),
+  OrderController.getAllOrderHistory
+);
+router.get(
+  "/unconfirm-order",
+  auth(UserRole.USER),
+  OrderController.getUserUnconfirmOrder
+);
+router.put(
+  "/update-order",
+  auth(UserRole.USER, UserRole.ADMIN, UserRole.ADMIN),
+  OrderController.updateOrderStatus
 );
 
 export const OrderRoute = router;

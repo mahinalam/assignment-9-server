@@ -13,12 +13,6 @@ import { FollowingShopController } from "./followingShop.controller";
 
 const router = express.Router();
 
-router.post(
-  "/",
-  // auth(UserRole.ADMIN),
-  FollowingShopController.followShop
-);
-
 // router.get(
 //   "/",
 //   // auth(UserRole.ADMIN),
