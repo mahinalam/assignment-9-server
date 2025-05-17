@@ -1,3 +1,268 @@
+// generator client {
+//   provider = "prisma-client-js"
+// }
+
+// datasource db {
+//   provider  = "postgresql"
+//   url       = env("DATABASE_URL")
+//   directUrl = env("DIRECT_URL")
+// }
+
+// model User {
+//   id           String     @id @default(uuid())
+//   name         String
+//   email        String     @unique
+//   password     String
+//   role         UserRole
+//   phoneNumber  String?
+//   profilePhoto String?
+//   address      String?
+//   status       UserStatus @default(ACTIVE)
+//   createdAt    DateTime   @default(now())
+//   updatedAt    DateTime   @updatedAt
+//   isDeleted    Boolean    @default(false)
+//   gender       String?
+
+//   shop   Shop?
+//   review Review[]
+
+//   followingShop FollowingShop[]
+//   cart          Cart?
+
+//   @@map("users")
+// }
+
+// model Shop {
+//   id          String   @id @default(uuid())
+//   name        String
+//   description String?
+//   address     String
+//   logo        String?
+//   createdAt   DateTime @default(now())
+//   updatedAt   DateTime @updatedAt
+//   isDeleted   Boolean  @default(false)
+
+//   ownerId       String          @unique
+//   owner         User            @relation(fields: [ownerId], references: [id])
+//   products      Product[]
+//   followingShop FollowingShop[]
+//   order         Order[]
+//   cart          Cart[]
+// }
+
+// model Category {
+//   id        String    @id @default(uuid())
+//   name      String    @unique
+//   imageUrl  String?
+//   isDeleted Boolean   @default(false)
+//   createdAt DateTime  @default(now())
+//   updatedAt DateTime  @updatedAt
+//   product   Product[]
+
+//   @@map("categories")
+// }
+
+// model Brand {
+//   id          String    @id @default(uuid())
+//   name        String    @unique
+//   logoUrl     String?
+//   description String    @default("")
+//   isDeleted   Boolean   @default(false)
+//   createdAt   DateTime  @default(now())
+//   updatedAt   DateTime  @updatedAt
+//   product     Product[]
+
+//   @@map("brands")
+// }
+
+// model Product {
+//   id          String      @id @default(uuid())
+//   name        String
+//   description String?
+//   price       Int
+//   discount    Int?        @default(0)
+//   stock       Int
+//   isFlashed   Boolean     @default(false)
+//   isFeatured  Boolean     @default(false)
+//   images      String[]    @default([])
+//   isDeleted   Boolean     @default(false)
+//   createdAt   DateTime    @default(now())
+//   updatedAt   DateTime    @updatedAt
+//   shop        Shop?       @relation(fields: [shopId], references: [id])
+//   shopId      String?
+//   brandId     String?
+//   brand       Brand?      @relation(fields: [brandId], references: [id])
+//   categoryId  String
+//   category    Category    @relation(fields: [categoryId], references: [id])
+//   orderItem   OrderItem[]
+//   review      Review[]
+//   cartItem    CartItem[]
+
+//   @@map("products")
+// }
+
+// model Cart {
+//   id         String   @id @default(uuid())
+//   customerId String   @unique
+//   shopId     String
+//   createdAt  DateTime @default(now())
+//   updatedAt  DateTime @updatedAt
+
+//   customer  User       @relation(fields: [customerId], references: [id])
+//   shop      Shop       @relation(fields: [shopId], references: [id])
+//   cartItems CartItem[]
+// }
+
+// model CartItem {
+//   id        String   @id @default(uuid())
+//   cartId    String
+//   productId String
+//   quantity  Int      @default(1)
+//   price     Float
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+//   cart      Cart     @relation(fields: [cartId], references: [id])
+//   product   Product  @relation(fields: [productId], references: [id])
+// }
+
+// model Order {
+//   id                      String        @id @default(uuid())
+//   status                  OrderStatus   @default(PENDING)
+//   totalPrice              Float
+//   transactionId           String        @unique
+//   createdAt               DateTime      @default(now())
+//   updatedAt               DateTime      @updatedAt
+//   isDeleted               Boolean       @default(false)
+//   customerEmail           String
+//   customerName            String
+//   customerPhone           String
+//   customerShippingAddress String
+//   cutomerProfilePhoto     String?
+//   shopId                  String
+//   shop                    Shop          @relation(fields: [shopId], references: [id])
+//   orderItems              OrderItem[]
+//   payment                 Payment?
+//   paymentStatus           PaymentStatus @default(PENDING)
+//   orderStatus             OrderStatus   @default(PENDING)
+//   source                  OrderSource   @default(CART)
+// }
+
+// model OrderItem {
+//   id        String   @id @default(uuid())
+//   quantity  Int
+//   price     Float
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+//   isDeleted Boolean  @default(false)
+
+//   productId String
+
+//   product Product @relation(fields: [productId], references: [id])
+//   orderId String
+//   order   Order   @relation(fields: [orderId], references: [id])
+// }
+
+// model Coupon {
+//   id         String     @id @default(uuid()) // Unique identifier for each coupon
+//   code       String     @unique // Coupon code, e.g., "SUMMER20"
+//   discount   Float
+//   type       CouponType @default(PERCENTAGE)
+//   expiration DateTime
+//   isDeleted  Boolean    @default(false)
+//   createdAt  DateTime   @default(now())
+//   updatedAt  DateTime   @updatedAt
+
+//   @@index([code])
+// }
+
+// enum CouponType {
+//   PERCENTAGE
+//   FIXED
+// }
+
+// model Payment {
+//   id            String        @id @default(uuid())
+//   amount        Float
+//   method        PaymentMethod @default(CASH_ON_DELIVERY)
+//   status        PaymentStatus @default(PENDING)
+//   transactionId String?       @unique
+//   createdAt     DateTime      @default(now())
+//   updatedAt     DateTime      @updatedAt
+//   isDeleted     Boolean       @default(false)
+
+//   orderId String @unique
+//   order   Order  @relation(fields: [orderId], references: [id])
+
+//   @@map("payments")
+// }
+
+// model Review {
+//   id        String   @id @default(uuid())
+//   rating    Int
+//   comment   String?
+//   images    String[] @default([])
+//   createdAt DateTime @default(now())
+//   productId String
+//   product   Product  @relation(fields: [productId], references: [id])
+//   userId    String
+//   user      User     @relation(fields: [userId], references: [id])
+//   isDeleted Boolean  @default(false)
+// }
+
+// model FollowingShop {
+//   followerId String
+//   shopId     String
+
+//   user User @relation(fields: [followerId], references: [id])
+//   shop Shop @relation(fields: [shopId], references: [id])
+
+//   @@id([followerId, shopId]) // This defines a composite primary key
+//   @@map("following_shops") // (Optional) Custom table name in the database
+// }
+
+// model SubscriptionsUser {
+//   email String @unique
+// }
+
+// enum UserRole {
+//   ADMIN
+//   VENDOR
+//   USER
+// }
+
+// // Enum to define source
+// enum OrderSource {
+//   CART
+//   BUY_NOW
+// }
+
+// enum UserStatus {
+//   ACTIVE
+//   BLOCKED
+//   DELETED
+// }
+
+// enum OrderStatus {
+//   PENDING
+//   CONFIRMED
+//   SHIPPED
+//   DELIVERED
+//   CANCELED
+// }
+
+// enum PaymentMethod {
+//   CREDIT_CARD
+//   DEBIT_CARD
+//   BKASH
+//   CASH_ON_DELIVERY
+// }
+
+// enum PaymentStatus {
+//   PENDING
+//   COMPLETED
+//   FAILED
+// }
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,50 +274,79 @@ datasource db {
 }
 
 model User {
-  id           String     @id @default(uuid())
-  name         String
-  email        String     @unique
-  password     String
-  role         UserRole
-  phoneNumber  String?
-  profilePhoto String?
-  address      String?
-  status       UserStatus @default(ACTIVE)
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  isDeleted    Boolean    @default(false)
-
-  shop   Shop?
-  review Review[]
-
-  followingShop FollowingShop[]
-  cart          Cart?
+  id        String    @id @default(uuid())
+  email     String    @unique
+  password  String
+  role      UserRole  @default(CUSTOMER)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  isDeleted Boolean   @default(false)
+  customer  Customer?
+  vendor    Vendor?
+  admin     Admin?
 
   @@map("users")
 }
 
-model Shop {
-  id          String   @id @default(uuid())
-  name        String
-  description String?
-  address     String
-  logo        String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  isDeleted   Boolean  @default(false)
-
-  ownerId       String          @unique
-  owner         User            @relation(fields: [ownerId], references: [id])
-  products      Product[]
+model Customer {
+  id            String          @id @default(uuid())
+  userId        String          @unique
+  email         String          @unique
+  name          String
+  phoneNumber   String?
+  profilePhoto  String?
+  address       String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  isDeleted     Boolean         @default(false)
+  gender        Gender?
+  user          User            @relation(fields: [userId], references: [id])
   followingShop FollowingShop[]
-  order         Order[]
-  cart          Cart[]
+  Cart          Cart?
+  review        Review[]
+
+  @@map("customers")
+}
+
+model Vendor {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  email        String   @unique
+  name         String
+  phoneNumber  String?
+  profilePhoto String?
+  address      String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  isDeleted    Boolean  @default(false)
+  gender       Gender?
+  user         User     @relation(fields: [userId], references: [id])
+  shop         Shop?
+
+  @@map("vendors")
+}
+
+model Admin {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  email        String   @unique
+  name         String
+  phoneNumber  String?
+  profilePhoto String?
+  address      String?
+  gender       Gender?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  isDeleted    Boolean  @default(false)
+  user         User     @relation(fields: [userId], references: [id])
+
+  @@map("admins")
 }
 
 model Category {
   id        String    @id @default(uuid())
-  name      String    @unique
-  imageUrl  String?
+  name      String
+  imageUrl  String
   isDeleted Boolean   @default(false)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -63,9 +357,9 @@ model Category {
 
 model Brand {
   id          String    @id @default(uuid())
-  name        String    @unique
-  logoUrl     String?
-  description String    @default("")
+  name        String
+  imageUrl    String
+  description String
   isDeleted   Boolean   @default(false)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -74,42 +368,95 @@ model Brand {
   @@map("brands")
 }
 
+model Shop {
+  id            String          @id @default(uuid())
+  name          String
+  logo          String?
+  description   String
+  address       String
+  status        ShopStatus      @default(ACTIVE)
+  vendorId      String          @unique
+  isDeleted     Boolean         @default(false)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  vendor        Vendor          @relation(fields: [vendorId], references: [id])
+  product       Product[]
+  followingShop FollowingShop[]
+  cart          Cart[]
+  order         Order[]
+  review        Review[]
+
+  @@map("shops")
+}
+
 model Product {
-  id          String      @id @default(uuid())
+  id          String   @id @default(uuid())
   name        String
   description String?
-  newPrice    Int
-  oldPrice    Int
+  price       Int
+  discount    Int?     @default(0)
   stock       Int
-  isFlash     Boolean     @default(false)
-  images      String[]    @default([])
-  disCounts   Int         @default(0)
-  isDeleted   Boolean     @default(false)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  shop        Shop?       @relation(fields: [shopId], references: [id])
-  shopId      String?
+  isFlashed   Boolean  @default(false)
+  isFeatured  Boolean  @default(false)
+  images      String[] @default([])
+  isDeleted   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  shopId      String
   brandId     String?
-  brand       Brand?      @relation(fields: [brandId], references: [id])
   categoryId  String
-  category    Category    @relation(fields: [categoryId], references: [id])
-  orderItem   OrderItem[]
-  review      Review[]
-  cartItem    CartItem[]
+
+  shop      Shop        @relation(fields: [shopId], references: [id])
+  brand     Brand?      @relation(fields: [brandId], references: [id])
+  category  Category    @relation(fields: [categoryId], references: [id])
+  cartItem  CartItem[]
+  orderItem OrderItem[]
+  review    Review[]
 
   @@map("products")
+}
+
+model Coupon {
+  id         String     @id @default(uuid()) // Unique identifier for each coupon
+  code       String     @unique // Coupon code, e.g., "SUMMER20"
+  discount   Float
+  type       CouponType @default(PERCENTAGE)
+  expiration DateTime
+  isDeleted  Boolean    @default(false)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  @@map("coupons")
+}
+
+model FollowingShop {
+  customerId String
+  shopId     String
+  isDeleted  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  customer Customer @relation(fields: [customerId], references: [id])
+  shop     Shop     @relation(fields: [shopId], references: [id])
+
+  @@id([customerId, shopId]) // This defines a composite primary key
+  @@map("following_shops") // (Optional) Custom table name in the database
 }
 
 model Cart {
   id         String   @id @default(uuid())
   customerId String   @unique
   shopId     String
+  isDeleted  Boolean  @default(false)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  customer  User       @relation(fields: [customerId], references: [id])
-  shop      Shop       @relation(fields: [shopId], references: [id])
-  cartItems CartItem[]
+  customer Customer @relation(fields: [customerId], references: [id])
+  shop     Shop     @relation(fields: [shopId], references: [id])
+
+  cartItem CartItem[]
+
+  @@map("carts")
 }
 
 model CartItem {
@@ -118,30 +465,38 @@ model CartItem {
   productId String
   quantity  Int      @default(1)
   price     Float
+  isDeleted Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  cart      Cart     @relation(fields: [cartId], references: [id])
   product   Product  @relation(fields: [productId], references: [id])
+  cart      Cart     @relation(fields: [cartId], references: [id])
+
+  @@map("cart_items")
 }
 
 model Order {
-  id                      String        @id @default(uuid())
-  status                  OrderStatus   @default(PENDING)
-  totalPrice              Float
-  transactionId           String        @unique
-  createdAt               DateTime      @default(now())
-  updatedAt               DateTime      @updatedAt
-  isDeleted               Boolean       @default(false)
-  customerEmail           String        @unique
-  customerName            String
-  customerPhone           String
-  customerShippingAddress String
-  shopId                  String
-  shop                    Shop          @relation(fields: [shopId], references: [id])
-  orderItems              OrderItem[]
-  payment                 Payment?
-  paymentStatus           PaymentStatus @default(PENDING)
-  orderStatus             OrderStatus   @default(PENDING)
+  id              String        @id @default(uuid())
+  customerEmail   String
+  customerName    String
+  phoneNumber     String
+  shippingAddress String
+  profilePhoto    String?
+  status          OrderStatus   @default(PENDING)
+  paymentStatus   PaymentStatus @default(PENDING)
+  totalPrice      Float
+
+  shopId        String
+  transactionId String   @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  isDeleted     Boolean  @default(false)
+
+  shop Shop @relation(fields: [shopId], references: [id])
+
+  orderItem OrderItem[]
+  payment   Payment?
+
+  @@map("orders")
 }
 
 model OrderItem {
@@ -157,27 +512,8 @@ model OrderItem {
   product Product @relation(fields: [productId], references: [id])
   orderId String
   order   Order   @relation(fields: [orderId], references: [id])
-}
 
-model Coupon {
-  id          String     @id @default(uuid()) // Unique identifier for each coupon
-  code        String     @unique // Coupon code, e.g., "SUMMER20"
-  discount    Float
-  type        CouponType @default(PERCENTAGE)
-  expiration  DateTime
-  minPurchase Float?
-  usageCount  Int        @default(0)
-  maxUsage    Int?
-  isDeleted   Boolean    @default(false)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-
-  @@index([code])
-}
-
-enum CouponType {
-  PERCENTAGE
-  FIXED
+  @@map("order_items")
 }
 
 model Payment {
@@ -197,39 +533,40 @@ model Payment {
 }
 
 model Review {
-  id        String   @id @default(uuid())
-  rating    Int
-  comment   String?
-  images    String[] @default([])
-  createdAt DateTime @default(now())
-  productId String
-  product   Product  @relation(fields: [productId], references: [id])
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  isDeleted Boolean  @default(false)
-}
-
-model FollowingShop {
-  followerId String
+  id         String   @id @default(uuid())
+  rating     Int
+  comment    String?
+  images     String[] @default([])
+  productId  String
+  customerId String
   shopId     String
 
-  user User @relation(fields: [followerId], references: [id])
-  shop Shop @relation(fields: [shopId], references: [id])
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  @@id([followerId, shopId]) // This defines a composite primary key
-  @@map("following_shops") // (Optional) Custom table name in the database
+  product  Product  @relation(fields: [productId], references: [id])
+  customer Customer @relation(fields: [customerId], references: [id])
+  shop     Shop     @relation(fields: [shopId], references: [id])
+
+  @@map("reviews")
 }
 
 enum UserRole {
-  ADMIN
+  CUSTOMER
   VENDOR
-  USER
+  ADMIN
 }
 
-enum UserStatus {
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum ShopStatus {
   ACTIVE
   BLOCKED
-  DELETED
 }
 
 enum OrderStatus {
@@ -240,15 +577,20 @@ enum OrderStatus {
   CANCELED
 }
 
-enum PaymentMethod {
-  CREDIT_CARD
-  DEBIT_CARD
-  BKASH
-  CASH_ON_DELIVERY
+enum CouponType {
+  PERCENTAGE
+  FXED
 }
 
 enum PaymentStatus {
   PENDING
   COMPLETED
   FAILED
+}
+
+enum PaymentMethod {
+  CREDIT_CARD
+  DEBIT_CARD
+  BKASH
+  CASH_ON_DELIVERY
 }

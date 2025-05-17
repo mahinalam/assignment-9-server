@@ -10,12 +10,10 @@ import auth from "../../middlewares/auth";
 const router = express.Router();
 
 router.get("/", ProductController.getAllProducts);
-
-router.get("/:id", ProductController.getSingleProductFromDB);
-
+//
 router.post(
   "/",
-  auth(UserRole.VENDOR, UserRole.ADMIN),
+  auth(UserRole.VENDOR),
   multerUpload.fields([{ name: "itemImages" }]),
   validateImageFileRequest(ImageFilesArrayZodSchema),
   parseBody,
@@ -23,6 +21,7 @@ router.post(
 );
 
 router.get("/vendor-products/:id", ProductController.getAllVendorProducts);
+router.get("/single-product/:id", ProductController.getSingleProductFromDB);
 
 router.patch(
   "/:id",

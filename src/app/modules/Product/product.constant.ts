@@ -1,4 +1,5 @@
 export const productSearchAbleFields = ["name", "description"];
+export const vendorProductSearchAbleFields = ["name", "description"];
 
 export const productFilterableFields: string[] = [
   "searchTerm",
@@ -8,3 +9,5 @@ export const productFilterableFields: string[] = [
   "brandId",
   "categoryId",
 ];
+
+export const vendorProductFilterableFields: string[] = ["searchTerm", "shopId"];

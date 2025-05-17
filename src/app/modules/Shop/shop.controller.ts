@@ -35,8 +35,6 @@ const createShop = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getVendorShop = catchAsync(async (req, res) => {
-  console.log(req.user);
-
   const result = await ShopService.getVendorShop(req.user);
 
   sendResponse(res, {
@@ -70,9 +68,55 @@ const followShop = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// update shop
+// const updateShop = catchAsync(async (req: Request, res: Response) => {
+//   const { id } = req.params;
+
+//   const result = await ShopService.updateShopIntoDB(id, req.body);
+
+//   sendResponse(res, {
+//     statusCode: 200,
+//     success: true,
+//     message: "Shop updated successfully!",
+//     data: result,
+//   });
+// });
+
+const updateShop = catchAsync(async (req: Request, res: Response) => {
+  const { userId } = req.user;
+
+  const result = await ShopService.updateShopIntoDB(
+    userId,
+    req.body,
+    req.file as TImageFile
+  );
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Shop updated successfuly!",
+    data: result,
+  });
+});
+
+const blockShop = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const result = await ShopService.blockShopIntoDB(id);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Shop blocked successfully!",
+    data: result,
+  });
+});
+
 export const ShopController = {
   createShop,
   getVendorShop,
   getAllShop,
   followShop,
+  blockShop,
+  updateShop,
 };

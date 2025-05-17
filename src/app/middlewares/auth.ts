@@ -70,12 +70,9 @@ const auth = (...requiredRoles: (keyof typeof UserRole)[]) => {
       },
     });
 
-    const status = user?.status;
+    const status = user?.isDeleted;
 
-    if (status === "BLOCKED") {
-      throw new ApiError(403, "This user is blocked !");
-    }
-    if (status === "DELETED") {
+    if (status) {
       throw new ApiError(403, "This user is deleted !");
     }
 

@@ -3,6 +3,17 @@ import prisma from "../../../sharred/prisma";
 import ApiError from "../../errors/ApiError";
 
 const createCouponIntoDB = async (payload: Coupon) => {
+  // check is coupon exits
+  const isCouponExists = await prisma.coupon.findFirst({
+    where: {
+      code: payload.code,
+      isDeleted: false,
+    },
+  });
+
+  if (isCouponExists) {
+    throw new ApiError(400, "Coupon alreday exists.");
+  }
   const result = await prisma.coupon.create({
     data: payload,
   });
@@ -35,7 +46,23 @@ const applyCouponCode = async (code: string) => {
 };
 
 const getAllCoupon = async () => {
-  const result = await prisma.coupon.findMany();
+  const result = await prisma.coupon.findMany({
+    where: { isDeleted: false },
+  });
+  return result;
+};
+
+// delete coupon
+const deleteCouponFromDB = async (couponId: string) => {
+  const result = await prisma.coupon.update({
+    where: {
+      id: couponId,
+      isDeleted: false,
+    },
+    data: {
+      isDeleted: true,
+    },
+  });
   return result;
 };
 
@@ -43,4 +70,5 @@ export const CouponService = {
   createCouponIntoDB,
   getAllCoupon,
   applyCouponCode,
+  deleteCouponFromDB,
 };

@@ -2,7 +2,10 @@ import { TImageFiles } from "../../interfaces/file";
 import { Prisma, Product } from "@prisma/client";
 import prisma from "../../../sharred/prisma";
 import { paginationHelper } from "../../../helpers/paginationHelper";
-import { productSearchAbleFields } from "./product.constant";
+import {
+  productSearchAbleFields,
+  vendorProductSearchAbleFields,
+} from "./product.constant";
 
 // const getAllProductsFromDB = async (
 //   fieldParams: any,
@@ -157,8 +160,8 @@ const getAllProductsFromDB = async (
   if (priceMin || priceMax) {
     andCondition.push({
       AND: [
-        priceMin ? { newPrice: { gte: parseInt(priceMin, 10) } } : {},
-        priceMax ? { newPrice: { lte: parseInt(priceMax, 10) } } : {},
+        priceMin ? { price: { gte: parseInt(priceMin, 10) } } : {},
+        priceMax ? { price: { lte: parseInt(priceMax, 10) } } : {},
       ],
     });
   }
@@ -180,7 +183,11 @@ const getAllProductsFromDB = async (
   }
 
   if (categoryId) {
-    andCondition.push({ categoryId });
+    if (categoryId === "all") {
+      andCondition.push({});
+    } else {
+      andCondition.push({ categoryId });
+    }
   }
 
   // // Add any additional filters from fieldParams
@@ -197,6 +204,7 @@ const getAllProductsFromDB = async (
   // Combine all conditions
   const whereCondition: Prisma.ProductWhereInput = {
     AND: andCondition,
+    isDeleted: false,
   };
 
   // Query database
@@ -230,11 +238,26 @@ const getAllProductsFromDB = async (
 };
 
 const createProductIntoDB = async (payload: Product, images: TImageFiles) => {
-  console.log("images", images);
+  // check is shop exits
+  await prisma.shop.findFirstOrThrow({
+    where: {
+      id: payload.shopId,
+      isDeleted: false,
+    },
+  });
+
+  // check is category exists
+  await prisma.category.findFirstOrThrow({
+    where: {
+      id: payload.categoryId,
+      isDeleted: false,
+    },
+  });
   const { itemImages } = images;
   payload.images = itemImages.map((image) => image.path);
+
   const result = await prisma.product.create({
-    data: payload,
+    data: { ...payload },
   });
 
   return result;
@@ -242,22 +265,81 @@ const createProductIntoDB = async (payload: Product, images: TImageFiles) => {
 
 // get all vendor shop products
 const getVendorShopProductsFromDB = async (shopId: string) => {
-  const result = await prisma.shop.findUniqueOrThrow({
+  const result = await prisma.shop.findFirst({
     where: {
       id: shopId,
       isDeleted: false,
     },
     include: {
-      products: {
-        include: {
-          review: true,
-        },
-      },
+      product: true,
       followingShop: true,
     },
   });
   return result;
 };
+
+// const getVendorProductsFromDB = async (
+//   fieldParams: any,
+//   paginationOption: any
+// ) => {
+//   const { limit, page, skip, sortBy, sortOrder } =
+//     paginationHelper.calculatePagination(paginationOption);
+//   const { searchTerm, shopId } = fieldParams;
+
+//   const andCondition: Prisma.ShopWhereInput[] = [];
+
+//   // Search functionality
+//   if (searchTerm) {
+//     andCondition.push({
+//       OR: vendorProductSearchAbleFields.map((field) => ({
+//         [field]: {
+//           contains: searchTerm,
+//           mode: "insensitive",
+//         },
+//       })),
+//     });
+//   }
+//   console.log("fields params", fieldParams);
+//   if (shopId) {
+//     andCondition.push({ id: shopId }, { isDeleted: false });
+//   }
+
+//   // Combine all conditions
+//   const whereCondition: Prisma.ShopWhereInput = {
+//     AND: andCondition,
+//   };
+
+//   // Query database
+//   const result = await prisma.shop.findMany({
+//     where: whereCondition,
+//     skip: skip,
+//     take: limit,
+//     include: {
+//       products: {
+//         include: {
+//           review: true,
+//         },
+//       },
+//       followingShop: true,
+//     },
+//     orderBy: {
+//       [sortBy || "createdAt"]: sortOrder || "desc",
+//     },
+//   });
+
+//   const total = await prisma.shop.count({
+//     where: whereCondition,
+//   });
+
+//   return {
+//     meta: {
+//       page,
+//       limit,
+//       total,
+//     },
+//     data: result,
+//   };
+// };
 
 // get single  product from db
 const getSingleProductFromDB = async (productId: string) => {
@@ -275,11 +357,6 @@ const getSingleProductFromDB = async (productId: string) => {
           id: true,
           images: true,
           rating: true,
-          user: {
-            select: {
-              name: true,
-            },
-          },
         },
       },
     },

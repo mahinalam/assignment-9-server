@@ -2,9 +2,12 @@ import { Request, Response } from "express";
 import catchAsync from "../../../sharred/catchAsync";
 import sendResponse from "../../../sharred/sendResponse";
 import { OrderService } from "./order.service";
+import pick from "../../../sharred/pick";
 
 const createOrder = catchAsync(async (req: Request, res: Response) => {
-  const result = await OrderService.createOrderIntoDB(req.body);
+  const { userId } = req.user;
+  console.log("order", req.body);
+  const result = await OrderService.createOrderIntoDB(userId, req.body);
 
   sendResponse(res, {
     statusCode: 200,
@@ -15,8 +18,8 @@ const createOrder = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getVendorOrderHistory = catchAsync(async (req, res) => {
-  const { userId } = req.user;
-  const orders = await OrderService.getVendorOrderHistory(userId);
+  const { email } = req.user;
+  const orders = await OrderService.getVendorOrderHistory(email);
 
   sendResponse(res, {
     success: true,
@@ -28,7 +31,16 @@ const getVendorOrderHistory = catchAsync(async (req, res) => {
 
 const getUsersOrderHistory = catchAsync(async (req, res) => {
   const { email } = req.user;
-  const orders = await OrderService.getUsersOrderHistory(email);
+  const paginationOption = pick(req.query, [
+    "limit",
+    "page",
+    "sortBy",
+    "sortOrder",
+  ]);
+  const orders = await OrderService.getUsersOrderHistory(
+    email,
+    paginationOption
+  );
 
   sendResponse(res, {
     success: true,

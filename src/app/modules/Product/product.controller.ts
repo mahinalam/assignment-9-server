@@ -5,7 +5,10 @@ import { ProductService } from "./product.service";
 import ApiError from "../../errors/ApiError";
 import { TImageFiles } from "../../interfaces/file";
 import pick from "../../../sharred/pick";
-import { productFilterableFields } from "./product.constant";
+import {
+  productFilterableFields,
+  vendorProductFilterableFields,
+} from "./product.constant";
 
 const getAllProducts = catchAsync(async (req, res) => {
   console.log("authorization", req.headers.authorization);
@@ -28,7 +31,6 @@ const getAllProducts = catchAsync(async (req, res) => {
     statusCode: 200,
     success: true,
     message: "Products retrieval successfully",
-    // meta: result.meta,
     data: result,
   });
 });
@@ -80,9 +82,6 @@ const getSingleProductFromDB = catchAsync(async (req, res) => {
 });
 
 const createProduct = catchAsync(async (req: Request, res: Response) => {
-  console.log("files", req.files);
-  console.log("body", req.body);
-
   if (!req.files) {
     throw new ApiError(400, "Please upload an image");
   }
@@ -94,7 +93,7 @@ const createProduct = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "Product Added successfuly!",
+    message: "Product Created successfuly!",
     data: result,
   });
 });
@@ -111,6 +110,30 @@ const getAllVendorProducts = catchAsync(async (req, res) => {
     data: products,
   });
 });
+
+// const getVendorProducts = catchAsync(async (req, res) => {
+//   console.log("hi");
+//   //pick
+//   const filterFields = pick(req.query, vendorProductFilterableFields);
+//   // pagination pick
+//   const paginationOption = pick(req.query, [
+//     "limit",
+//     "page",
+//     "sortBy",
+//     "sortOrder",
+//   ]);
+//   const result = await ProductService.getVendorProductsFromDB(
+//     filterFields,
+//     paginationOption
+//   );
+
+//   sendResponse(res, {
+//     statusCode: 200,
+//     success: true,
+//     message: "Vendor products retrieval successfully",
+//     data: result,
+//   });
+// });
 
 const updateVendorShopProduct = catchAsync(
   async (req: Request, res: Response) => {

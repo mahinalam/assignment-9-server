@@ -11,21 +11,28 @@ export const addToCart = async (
   }
 ) => {
   const { shopId, productId, price, quantity = 1 } = payload;
-  console.log("quantity", quantity);
+
+  // check is the customer exists
+  const isCustomerExists = await prisma.customer.findFirstOrThrow({
+    where: {
+      userId: customerId,
+      isDeleted: false,
+    },
+  });
 
   // Check if the cart already exists for the customer
   let cart = await prisma.cart.findUnique({
-    where: { customerId },
-    include: { cartItems: true },
+    where: { customerId: isCustomerExists.id },
+    include: { cartItem: true },
   });
 
   if (!cart) {
     // Create a new cart if it doesn't exist
     cart = await prisma.cart.create({
       data: {
-        customerId,
+        customerId: isCustomerExists.id,
         shopId,
-        cartItems: {
+        cartItem: {
           create: {
             productId,
             price,
@@ -33,10 +40,10 @@ export const addToCart = async (
           },
         },
       },
-      include: { cartItems: true },
+      include: { cartItem: true },
     });
   } else {
-    // check if shopid exist si the cart
+    // check if shopid exist  the cart
 
     if (cart.shopId !== shopId) {
       throw new Error(
@@ -45,7 +52,7 @@ export const addToCart = async (
     }
 
     // Check if the product is already in the cart
-    const existingCartItem = cart.cartItems.find(
+    const existingCartItem = cart.cartItem.find(
       (item) => item.productId === productId
     );
 
@@ -85,7 +92,7 @@ export const clearCart = async (customerId: string) => {
   // Find the customer's cart
   const cart = await prisma.cart.findUnique({
     where: { customerId },
-    include: { cartItems: true },
+    include: { cartItem: true },
   });
 
   if (!cart) {
@@ -119,13 +126,19 @@ export const removeCartItem = async (cartItemId: string) => {
 };
 
 // Get user's specific cart with total quantity and total price
-const getUserCart = async (customerId: string) => {
-  console.log("customer id from ", customerId);
+const getUserCart = async (userId: string) => {
+  // check is the customer exists
+  const isCustomerExists = await prisma.customer.findFirstOrThrow({
+    where: {
+      userId,
+      isDeleted: false,
+    },
+  });
   // Fetch the cart along with its items
   const cart = await prisma.cart.findUnique({
-    where: { customerId },
+    where: { customerId: isCustomerExists.id },
     include: {
-      cartItems: {
+      cartItem: {
         include: {
           product: true, // Include product details if needed
         },
@@ -133,16 +146,22 @@ const getUserCart = async (customerId: string) => {
     },
   });
 
-  if (!cart) {
-    throw new ApiError(404, "Cart not found");
+  if (!cart || cart.cartItem.length === 0) {
+    // No cart or no items — return empty cart info
+    return {
+      cart: null,
+      cartItems: [],
+      totalQuantity: 0,
+      totalPrice: 0,
+    };
   }
 
   // Calculate total quantity and total price
-  const totalQuantity = cart.cartItems.reduce(
+  const totalQuantity = cart.cartItem.reduce(
     (sum, item) => sum + item.quantity,
     0
   );
-  const totalPrice = cart.cartItems.reduce(
+  const totalPrice = cart.cartItem.reduce(
     (sum, item) => sum + item.quantity * item.price,
     0
   );
@@ -152,7 +171,7 @@ const getUserCart = async (customerId: string) => {
     cartId: cart.id,
     customerId: cart.customerId,
     shopId: cart.shopId,
-    cartItems: cart.cartItems,
+    cartItems: cart.cartItem,
     totalQuantity,
     totalPrice,
   };

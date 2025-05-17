@@ -5,7 +5,7 @@ import { OrderController } from "./order.controller";
 
 const router = express.Router();
 
-router.post("/", auth(UserRole.USER), OrderController.createOrder);
+router.post("/", auth(UserRole.CUSTOMER), OrderController.createOrder);
 
 router.get(
   "/vendor-order-history",
@@ -15,7 +15,7 @@ router.get(
 
 router.get(
   "/user-order-history",
-  auth(UserRole.USER),
+  auth(UserRole.CUSTOMER),
   OrderController.getUsersOrderHistory
 );
 
@@ -26,13 +26,13 @@ router.get(
 );
 router.get(
   "/unconfirm-order",
-  auth(UserRole.USER),
+  auth(UserRole.CUSTOMER),
   OrderController.getUserUnconfirmOrder
 );
-router.put(
-  "/update-order",
-  auth(UserRole.USER, UserRole.ADMIN, UserRole.ADMIN),
-  OrderController.updateOrderStatus
-);
+// router.put(
+//   "/update-order",
+//   auth(UserRole.CUSTOMER, UserRole.ADMIN, UserRole.ADMIN),
+//   OrderController.updateOrderStatus
+// );
 
 export const OrderRoute = router;

@@ -7,6 +7,7 @@ import prisma from "../../../sharred/prisma";
 import { CategoryService } from "./category.service";
 import ApiError from "../../errors/ApiError";
 import { TImageFile } from "../../interfaces/file";
+import pick from "../../../sharred/pick";
 
 const createCategory = catchAsync(async (req: Request, res: Response) => {
   const result = await CategoryService.createCategoryIntoDB(req.body);
@@ -20,7 +21,15 @@ const createCategory = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllCategories = catchAsync(async (req, res) => {
-  const categories = await CategoryService.getAllCategoriesFromDB();
+  const paginationOption = pick(req.query, [
+    "limit",
+    "page",
+    "sortBy",
+    "sortOrder",
+  ]);
+  const categories = await CategoryService.getAllCategoriesFromDB(
+    paginationOption
+  );
 
   sendResponse(res, {
     success: true,
@@ -42,8 +51,22 @@ const getSingleCategory = catchAsync(async (req, res) => {
   });
 });
 
+// delete category
+const deleteCategory = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const result = await CategoryService.deleteCategoryFromDB(id);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Category deleted successfuly!",
+    data: result,
+  });
+});
 export const CategoryController = {
   createCategory,
   getAllCategories,
   getSingleCategory,
+  deleteCategory,
 };

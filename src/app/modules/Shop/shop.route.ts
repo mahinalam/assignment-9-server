@@ -14,9 +14,18 @@ router.post(
   parseBody,
   ShopController.createShop
 );
-router.post("/follow-shop", auth(UserRole.USER), ShopController.followShop);
+router.post("/follow-shop", auth(UserRole.CUSTOMER), ShopController.followShop);
 
+router.get("/vendor-shop", auth(UserRole.VENDOR), ShopController.getVendorShop);
 router.get("/", ShopController.getAllShop);
-router.get("/vendor-shop", ShopController.getVendorShop);
+
+router.put(
+  "/",
+  multerUpload.single("logoImage"),
+  parseBody,
+  auth(UserRole.VENDOR),
+  ShopController.updateShop
+);
+router.delete("/:id", auth(UserRole.ADMIN), ShopController.blockShop);
 
 export const ShopRoute = router;
