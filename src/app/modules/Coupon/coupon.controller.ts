@@ -2,6 +2,7 @@ import { Request, RequestHandler, Response } from "express";
 import catchAsync from "../../../sharred/catchAsync";
 import sendResponse from "../../../sharred/sendResponse";
 import { CouponService } from "./coupon.service";
+import pick from "../../../sharred/pick";
 
 const createCoupon = catchAsync(async (req: Request, res: Response) => {
   const result = await CouponService.createCouponIntoDB(req.body);
@@ -27,7 +28,13 @@ const applyCouponCode = catchAsync(async (req, res) => {
 });
 
 const allCoupon = catchAsync(async (req, res) => {
-  const result = await CouponService.getAllCoupon();
+  const paginationOption = pick(req.query, [
+    "limit",
+    "page",
+    "sortBy",
+    "sortOrder",
+  ]);
+  const result = await CouponService.getAllCoupon(paginationOption);
 
   sendResponse(res, {
     success: true,

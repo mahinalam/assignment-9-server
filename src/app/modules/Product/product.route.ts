@@ -10,6 +10,8 @@ import auth from "../../middlewares/auth";
 const router = express.Router();
 
 router.get("/", ProductController.getAllProducts);
+router.get("/featured", ProductController.getAllFeaturedProducts);
+router.get("/flash", ProductController.getAllFlashProducts);
 //
 router.post(
   "/",
@@ -23,10 +25,15 @@ router.post(
 router.get("/vendor-products/:id", ProductController.getAllVendorProducts);
 router.get("/single-product/:id", ProductController.getSingleProductFromDB);
 
+// router.patch(
+//   "/:id",
+//   auth(UserRole.ADMIN, UserRole.VENDOR),
+//   ProductController.updateVendorShopProduct
+// );
 router.patch(
-  "/:id",
-  auth(UserRole.ADMIN, UserRole.VENDOR),
-  ProductController.updateVendorShopProduct
+  "/update-product",
+  auth(UserRole.ADMIN),
+  ProductController.updateProductStatus
 );
 router.delete(
   "/:id",

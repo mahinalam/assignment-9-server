@@ -35,6 +35,48 @@ const getAllProducts = catchAsync(async (req, res) => {
   });
 });
 
+// get all featured products
+const getAllFeaturedProducts = catchAsync(async (req, res) => {
+  // pagination pick
+  const paginationOption = pick(req.query, [
+    "limit",
+    "page",
+    "sortBy",
+    "sortOrder",
+  ]);
+  const result = await ProductService.getAllFeaturedProductsFromDB(
+    paginationOption
+  );
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Featured products retrieval successfully",
+    data: result,
+  });
+});
+
+// get all flash products
+const getAllFlashProducts = catchAsync(async (req, res) => {
+  // pagination pick
+  const paginationOption = pick(req.query, [
+    "limit",
+    "page",
+    "sortBy",
+    "sortOrder",
+  ]);
+  const result = await ProductService.getAllFlashProductsFromDB(
+    paginationOption
+  );
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Flash products retrieval successfully",
+    data: result,
+  });
+});
+
 // const getAllProducts = catchAsync(async (req, res) => {
 //   const {
 //     rating,
@@ -150,6 +192,18 @@ const updateVendorShopProduct = catchAsync(
   }
 );
 
+// update product status
+const updateProductStatus = catchAsync(async (req: Request, res: Response) => {
+  const result = await ProductService.updateProductStatusIntoDB(req.body);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Product updated successfuly!",
+    data: result,
+  });
+});
+
 const deleteVendorShopProduct = catchAsync(
   async (req: Request, res: Response) => {
     const { id } = req.params;
@@ -172,4 +226,7 @@ export const ProductController = {
   getAllVendorProducts,
   updateVendorShopProduct,
   deleteVendorShopProduct,
+  getAllFeaturedProducts,
+  getAllFlashProducts,
+  updateProductStatus,
 };

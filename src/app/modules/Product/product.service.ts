@@ -133,6 +133,108 @@ import {
 //   return products;
 // };
 
+// get all featured products
+const getAllFeaturedProductsFromDB = async (paginationOption: any) => {
+  const { limit, page, skip, sortBy, sortOrder } =
+    paginationHelper.calculatePagination(paginationOption);
+  const result = await prisma.product.findMany({
+    where: {
+      isDeleted: false,
+      isFeatured: true,
+    },
+    select: {
+      id: true,
+      name: true,
+      brand: {
+        select: {
+          name: true,
+        },
+      },
+      category: {
+        select: {
+          name: true,
+        },
+      },
+      shop: {
+        select: {
+          name: true,
+        },
+      },
+      price: true,
+      stock: true,
+      images: true,
+      discount: true,
+    },
+    skip: skip,
+    take: limit,
+    orderBy: {
+      [sortBy || "createdAt"]: sortOrder || "desc",
+    },
+  });
+  const total = await prisma.product.count({
+    where: { isDeleted: false, isFeatured: true },
+  });
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
+};
+
+// get all flash products
+const getAllFlashProductsFromDB = async (paginationOption: any) => {
+  const { limit, page, skip, sortBy, sortOrder } =
+    paginationHelper.calculatePagination(paginationOption);
+  const result = await prisma.product.findMany({
+    where: {
+      isDeleted: false,
+      isFlashed: true,
+    },
+    select: {
+      id: true,
+      name: true,
+      brand: {
+        select: {
+          name: true,
+        },
+      },
+      category: {
+        select: {
+          name: true,
+        },
+      },
+      shop: {
+        select: {
+          name: true,
+        },
+      },
+      price: true,
+      stock: true,
+      images: true,
+      discount: true,
+    },
+    skip: skip,
+    take: limit,
+    orderBy: {
+      [sortBy || "createdAt"]: sortOrder || "desc",
+    },
+  });
+  const total = await prisma.product.count({
+    where: { isDeleted: false, isFlashed: true },
+  });
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
+};
+
 const getAllProductsFromDB = async (
   fieldParams: any,
   paginationOption: any
@@ -190,34 +292,26 @@ const getAllProductsFromDB = async (
     }
   }
 
-  // // Add any additional filters from fieldParams
-  // if (Object.keys(otherFilters)?.length > 0) {
-  //   andCondition.push({
-  //     AND: Object.keys(otherFilters).map((key) => ({
-  //       [key]: {
-  //         equals: otherFilters[key],
-  //       },
-  //     })),
-  //   });
-  // }
-
   // Combine all conditions
   const whereCondition: Prisma.ProductWhereInput = {
     AND: andCondition,
     isDeleted: false,
+    isFeatured: false,
+    isFlashed: false,
   };
 
   // Query database
   const result = await prisma.product.findMany({
     where: whereCondition,
-    skip: skip,
-    take: limit,
     include: {
       review: true,
       brand: true,
       category: true,
       shop: true,
     },
+    skip: skip,
+    take: limit,
+
     orderBy: {
       [sortBy || "createdAt"]: sortOrder || "desc",
     },
@@ -364,10 +458,84 @@ const getSingleProductFromDB = async (productId: string) => {
   return result;
 };
 
+// const updateProductStatusIntoDB = async (payload: {
+//   id: string;
+//   status: any;
+// }) => {
+//   // check is shop exits
+//   await prisma.product.findUniqueOrThrow({
+//     where: {
+//       id: payload.id,
+//     },
+//   });
+
+//   const updatedData: Record<string, unknown> = {};
+
+//   if (payload.status === "flash") {
+//     updatedData.isFlashed = true;
+//   }
+
+//   if (payload.status === "featured") {
+//     updatedData.isFeatured = true;
+//   }
+
+//   // update product status
+//   const result = await prisma.product.update({
+//     where: {
+//       id: payload.id,
+//       isDeleted: false,
+//     },
+//     data: updatedData,
+//   });
+
+//   return result;
+// };
+
+const updateProductStatusIntoDB = async (payload: {
+  id: string;
+  status: any;
+}) => {
+  console.log("id", payload.id);
+  console.log("status", payload.status);
+  // Check if product exists and is not deleted
+  await prisma.product.findFirstOrThrow({
+    where: {
+      id: payload.id,
+      isDeleted: false,
+    },
+  });
+
+  // Build update object
+  const dataToUpdate: any = {};
+
+  if (payload?.status?.isFlashed) {
+    dataToUpdate.isFlashed = true;
+  } else {
+    dataToUpdate.isFlashed = false;
+  }
+
+  if (payload?.status?.isFeatured) {
+    dataToUpdate.isFeatured = true;
+  } else {
+    dataToUpdate.isFeatured = false;
+  }
+
+  // Update product
+  const result = await prisma.product.update({
+    where: {
+      id: payload.id,
+    },
+    data: dataToUpdate,
+  });
+
+  return result;
+};
+
 const updateVendorProductIntoDB = async (
   id: string,
   payload: Partial<Product>
 ) => {
+  console.log(id);
   const result = await prisma.product.update({
     where: {
       id,
@@ -400,4 +568,7 @@ export const ProductService = {
   getVendorShopProductsFromDB,
   updateVendorProductIntoDB,
   deleteVendorProductFromDB,
+  getAllFeaturedProductsFromDB,
+  getAllFlashProductsFromDB,
+  updateProductStatusIntoDB,
 };

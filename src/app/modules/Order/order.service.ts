@@ -155,7 +155,7 @@ export const createOrderIntoDB = async (userId: any, payload: any) => {
   console.log("from order", payload);
 
   const totalPrice = orderItems.reduce((total: number, item: any) => {
-    return total + item.price * item.quantity;
+    return total + Number(item.price) * Number(item.quantity);
   }, 0);
 
   // const existingOrder = await prisma.order.findFirst({
@@ -213,6 +213,8 @@ export const createOrderIntoDB = async (userId: any, payload: any) => {
       },
     });
 
+    console.log("is customer exist", isCustomerExists);
+
     const existingCart = await prisma.cart.findFirst({
       where: {
         customerId: isCustomerExists!.id,
@@ -221,6 +223,7 @@ export const createOrderIntoDB = async (userId: any, payload: any) => {
         cartItem: true,
       },
     });
+    console.log("cartItem"), existingCart;
     for (const item of existingCart!.cartItem) {
       await tx.cartItem.deleteMany({
         where: { cartId: existingCart!.id },
@@ -305,10 +308,41 @@ const getVendorOrderHistory = async (email: string) => {
   return isVendorExists;
 };
 
-const getAllOrderHistory = async () => {
+const getAllCategoriesFromDB = async (paginationOption: any) => {
+  const { limit, page, skip, sortBy, sortOrder } =
+    paginationHelper.calculatePagination(paginationOption);
+
+  const result = await prisma.category.findMany({
+    where: { isDeleted: false },
+    skip: skip,
+    take: limit,
+    orderBy: {
+      [sortBy || "createdAt"]: sortOrder || "desc",
+    },
+  });
+
+  const total = await prisma.category.count();
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
+};
+
+const getAllOrderHistory = async (paginationOption: any) => {
+  const { limit, page, skip, sortBy, sortOrder } =
+    paginationHelper.calculatePagination(paginationOption);
   const orders = await prisma.order.findMany({
     where: {
       isDeleted: false,
+    },
+    skip: skip,
+    take: limit,
+    orderBy: {
+      [sortBy || "createdAt"]: sortOrder || "desc",
     },
     include: {
       orderItem: true,
@@ -316,7 +350,15 @@ const getAllOrderHistory = async () => {
     },
   });
 
-  return orders;
+  const total = await prisma.order.count();
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: orders,
+  };
 };
 
 const getUsersOrderHistory = async (email: string, paginationOption: any) => {

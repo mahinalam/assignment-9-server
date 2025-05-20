@@ -8,7 +8,7 @@ const app: Application = express();
 app.use(
   cors({
     origin: [
-      "http://localhost:3001", // Development environment
+      "http://localhost:3000", // Development environment
       "https://electromert-e-commerce-client.vercel.app", // Production frontend
     ],
     credentials: true, // Allow cookies, authorization headers, etc.

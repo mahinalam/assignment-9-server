@@ -99,12 +99,20 @@ import prisma from "../../../sharred/prisma";
 import { JwtPayload } from "jsonwebtoken";
 import { TImageFile } from "../../interfaces/file";
 import ApiError from "../../errors/ApiError";
+import { paginationHelper } from "../../../helpers/paginationHelper";
 
-const getAllShop = async () => {
+const getAllShop = async (paginationOption: any) => {
+  const { limit, page, skip, sortBy, sortOrder } =
+    paginationHelper.calculatePagination(paginationOption);
   const result = await prisma.shop.findMany({
     where: {
       isDeleted: false,
       status: "ACTIVE",
+    },
+    skip: skip,
+    take: limit,
+    orderBy: {
+      [sortBy || "createdAt"]: sortOrder || "desc",
     },
     include: {
       product: true,
@@ -113,7 +121,15 @@ const getAllShop = async () => {
     },
   });
 
-  return result;
+  const total = await prisma.shop.count();
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
 };
 
 const createShopIntoDB = async (

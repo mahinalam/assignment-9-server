@@ -51,7 +51,13 @@ const getUsersOrderHistory = catchAsync(async (req, res) => {
 });
 
 const getAllOrderHistory = catchAsync(async (req, res) => {
-  const orders = await OrderService.getAllOrderHistory();
+  const paginationOption = pick(req.query, [
+    "limit",
+    "page",
+    "sortBy",
+    "sortOrder",
+  ]);
+  const orders = await OrderService.getAllOrderHistory(paginationOption);
 
   sendResponse(res, {
     success: true,

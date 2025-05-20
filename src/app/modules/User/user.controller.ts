@@ -117,9 +117,16 @@ import catchAsync from "../../../sharred/catchAsync";
 import sendResponse from "../../../sharred/sendResponse";
 import { UserService } from "./user.service";
 import { TImageFile } from "../../interfaces/file";
+import pick from "../../../sharred/pick";
 
 const getAllUsers = catchAsync(async (req, res) => {
-  const result = await UserService.getAllUsersFromDB();
+  const paginationOption = pick(req.query, [
+    "limit",
+    "page",
+    "sortBy",
+    "sortOrder",
+  ]);
+  const result = await UserService.getAllUsersFromDB(paginationOption);
 
   sendResponse(res, {
     success: true,

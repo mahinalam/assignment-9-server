@@ -1,6 +1,7 @@
 import { Coupon } from "@prisma/client";
 import prisma from "../../../sharred/prisma";
 import ApiError from "../../errors/ApiError";
+import { paginationHelper } from "../../../helpers/paginationHelper";
 
 const createCouponIntoDB = async (payload: Coupon) => {
   // check is coupon exits
@@ -45,11 +46,26 @@ const applyCouponCode = async (code: string) => {
   return isCouponExists;
 };
 
-const getAllCoupon = async () => {
+const getAllCoupon = async (paginationOption: any) => {
+  const { limit, page, skip, sortBy, sortOrder } =
+    paginationHelper.calculatePagination(paginationOption);
   const result = await prisma.coupon.findMany({
     where: { isDeleted: false },
+    skip: skip,
+    take: limit,
+    orderBy: {
+      [sortBy || "createdAt"]: sortOrder || "desc",
+    },
   });
-  return result;
+  const total = await prisma.coupon.count();
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
 };
 
 // delete coupon

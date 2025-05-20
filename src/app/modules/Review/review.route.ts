@@ -26,7 +26,7 @@ router.get(
 );
 // router.get("/user-products-reviews/:id", ReviewController.getUserProductReview);
 
-// router.get("/", ReviewController.getProductSpecificReviews);
+router.get("/product/review", ReviewController.getProductSpecificReviews);
 
 router.delete(
   "/:id",

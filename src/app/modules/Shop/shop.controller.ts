@@ -13,6 +13,7 @@ import prisma from "../../../sharred/prisma";
 import { ShopService } from "./shop.service";
 import ApiError from "../../errors/ApiError";
 import { TImageFile } from "../../interfaces/file";
+import pick from "../../../sharred/pick";
 // import { CategoryService } from "./category.service";
 
 const createShop = catchAsync(async (req: Request, res: Response) => {
@@ -46,7 +47,13 @@ const getVendorShop = catchAsync(async (req, res) => {
 });
 
 const getAllShop = catchAsync(async (req, res) => {
-  const result = await ShopService.getAllShop();
+  const paginationOption = pick(req.query, [
+    "limit",
+    "page",
+    "sortBy",
+    "sortOrder",
+  ]);
+  const result = await ShopService.getAllShop(paginationOption);
 
   sendResponse(res, {
     success: true,

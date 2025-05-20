@@ -286,6 +286,7 @@ import { User, UserRole } from "@prisma/client";
 import prisma from "../../../sharred/prisma";
 import ApiError from "../../errors/ApiError";
 import { TImageFile } from "../../interfaces/file";
+import { paginationHelper } from "../../../helpers/paginationHelper";
 
 // create customer
 const createCustomerIntoDB = async (userInfo: any, customerInfo: any) => {
@@ -359,16 +360,31 @@ const createVendorIntoDB = async (userInfo: any, vendorInfo: any) => {
   return result;
 };
 
-const getAllUsersFromDB = async () => {
+const getAllUsersFromDB = async (paginationOption: any) => {
+  const { limit, page, skip, sortBy, sortOrder } =
+    paginationHelper.calculatePagination(paginationOption);
   const result = await prisma.user.findMany({
     where: {
       isDeleted: false,
+    },
+    skip: skip,
+    take: limit,
+    orderBy: {
+      [sortBy || "createdAt"]: sortOrder || "desc",
     },
     omit: {
       password: true,
     },
   });
-  return result;
+  const total = await prisma.user.count();
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
 };
 
 const getSingleUserFromDB = async (id: string) => {

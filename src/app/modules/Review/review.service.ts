@@ -38,10 +38,17 @@ import ApiError from "../../errors/ApiError";
 // };
 
 // get all reviews
-const getAllReviewsFromDB = async () => {
+const getAllReviewsFromDB = async (paginationOption: any) => {
+  const { limit, page, skip, sortBy, sortOrder } =
+    paginationHelper.calculatePagination(paginationOption);
   const result = await prisma.review.findMany({
     where: {
       isDeleted: false,
+    },
+    skip: skip,
+    take: limit,
+    orderBy: {
+      [sortBy || "createdAt"]: sortOrder || "desc",
     },
     select: {
       rating: true,
@@ -66,11 +73,18 @@ const getAllReviewsFromDB = async () => {
       },
     },
   });
-
-  return result;
+  const total = await prisma.review.count();
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
 };
 
-// get  product spscific reviews
+// get  product specific reviews
 const getProductSpecificReviews = async (
   fieldParams: any,
   paginationOption: any
@@ -126,9 +140,6 @@ const getProductSpecificReviews = async (
     where: whereCondition,
     skip: skip,
     take: limit,
-    include: {
-      user: true,
-    },
 
     // include: {
     //   review: true,
@@ -145,13 +156,18 @@ const getProductSpecificReviews = async (
     where: whereCondition,
   });
 
+  const aggregateRating = await prisma.review.aggregate({
+    _avg: {
+      rating: true,
+    },
+  });
   return {
     meta: {
       page,
       limit,
       total,
     },
-    data: result,
+    data: { result, aggregateRating },
   };
 };
 
@@ -181,7 +197,31 @@ const getAllVendorProductsReviews = async (email: string) => {
       isDeleted: false, // Match the Vendor's `ownerId`
     },
     include: {
-      product: true,
+      product: {
+        omit: {
+          isDeleted: true,
+          isFeatured: true,
+          isFlashed: true,
+          createdAt: true,
+          updatedAt: true,
+          shopId: true,
+          brandId: true,
+          categoryId: true,
+        },
+      },
+      customer: {
+        select: {
+          email: true,
+        },
+      },
+    },
+    omit: {
+      customerId: true,
+      productId: true,
+      shopId: true,
+      isDeleted: true,
+      createdAt: true,
+      updatedAt: true,
     },
   });
 

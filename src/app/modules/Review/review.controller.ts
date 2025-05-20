@@ -8,7 +8,13 @@ import { reviewFilterableFields } from "./review.constant";
 
 // get all reviews
 const getAllReviews = catchAsync(async (req, res) => {
-  const reviews = await ReviewService.getAllReviewsFromDB();
+  const paginationOption = pick(req.query, [
+    "limit",
+    "page",
+    "sortBy",
+    "sortOrder",
+  ]);
+  const reviews = await ReviewService.getAllReviewsFromDB(paginationOption);
 
   sendResponse(res, {
     success: true,
