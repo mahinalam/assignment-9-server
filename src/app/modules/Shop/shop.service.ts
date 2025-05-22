@@ -169,7 +169,55 @@ const createShopIntoDB = async (
   return result;
 };
 
-const getVendorShop = async (user: JwtPayload) => {
+// const getVendorShop = async (paginationOption:any, user: JwtPayload) => {
+//     const { limit, page, skip, sortBy, sortOrder } =
+//     paginationHelper.calculatePagination(paginationOption);
+//   const result = await prisma.user.findUnique({
+//     where: {
+//       id: user?.userId,
+//       isDeleted: false,
+//     },
+//         skip: skip,
+//     take: limit,
+//     orderBy: {
+//       [sortBy || "createdAt"]: sortOrder || "desc",
+//     },
+//     select: {
+//       vendor: {
+//         select: {
+//           shop: {
+//             select: {
+//               name: true,
+//               id: true,
+
+//               product: {
+//                 where: {
+//                   isDeleted: false,
+//                 },
+//                 include: {
+//                   category: {
+//                     select: {
+//                       id: true,
+//                       name: true,
+//                     },
+//                   },
+//                 },
+//               },
+//             },
+//           },
+
+//         },
+//       },
+//     },
+
+//   });
+
+//   return result;
+// };
+const getVendorShop = async (paginationOption: any, user: JwtPayload) => {
+  const { limit, page, skip, sortBy, sortOrder } =
+    paginationHelper.calculatePagination(paginationOption);
+
   const result = await prisma.user.findUnique({
     where: {
       id: user?.userId,
@@ -178,13 +226,53 @@ const getVendorShop = async (user: JwtPayload) => {
     select: {
       vendor: {
         select: {
-          shop: true,
+          shop: {
+            select: {
+              name: true,
+              id: true,
+              product: {
+                where: {
+                  isDeleted: false,
+                },
+                include: {
+                  category: {
+                    select: {
+                      id: true,
+                      name: true,
+                    },
+                  },
+                },
+                skip: skip,
+                take: limit,
+                orderBy: {
+                  [sortBy || "createdAt"]: sortOrder || "desc",
+                },
+              },
+            },
+          },
         },
       },
     },
   });
 
-  return result;
+  const total = await prisma.product.count({
+    where: {
+      isDeleted: false,
+      shop: {
+        vendor: {
+          userId: user.userId,
+        },
+      },
+    },
+  });
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
 };
 
 const followShop = async (followerId: string, shopId: string) => {

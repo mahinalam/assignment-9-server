@@ -331,6 +331,7 @@ const getAllProductsFromDB = async (
   };
 };
 
+// create product
 const createProductIntoDB = async (payload: Product, images: TImageFiles) => {
   // check is shop exits
   await prisma.shop.findFirstOrThrow({
@@ -347,11 +348,73 @@ const createProductIntoDB = async (payload: Product, images: TImageFiles) => {
       isDeleted: false,
     },
   });
+
+  const productData = {
+    ...payload,
+    price: Number(payload.price),
+    stock: Number(payload.stock),
+    discount: payload?.discount ? Number(payload.discount) : 0,
+  };
+
   const { itemImages } = images;
-  payload.images = itemImages.map((image) => image.path);
+  console.log("items images", itemImages);
+  if (images) {
+    const newImagePaths = itemImages.map((image) => image.path);
+
+    productData.images = newImagePaths;
+  }
 
   const result = await prisma.product.create({
-    data: { ...payload },
+    data: productData,
+  });
+
+  return result;
+};
+
+// update product
+const updateProductIntoDB = async (payload: Product, images: TImageFiles) => {
+  console.log("images", images);
+
+  // Check if product exists
+  await prisma.product.findFirstOrThrow({
+    where: {
+      id: payload.id,
+      isDeleted: false,
+    },
+  });
+
+  // Check if category exists
+  await prisma.category.findFirstOrThrow({
+    where: {
+      id: payload.categoryId,
+      isDeleted: false,
+    },
+  });
+
+  const updatedProductData: any = {
+    ...payload,
+    price: Number(payload.price),
+    stock: Number(payload.stock),
+    discount: payload?.discount ? Number(payload.discount) : 0,
+  };
+
+  const productImages = images?.itemImages;
+
+  // If new images are provided, replace the old ones
+  if (productImages && Object.keys(productImages).length > 0) {
+    const newImagePaths = productImages.map((image) => image.path);
+
+    updatedProductData.images = newImagePaths;
+  } else {
+    // Don't update the images field if no new images are provided
+    delete updatedProductData.images;
+  }
+
+  const result = await prisma.product.update({
+    where: {
+      id: payload.id,
+    },
+    data: updatedProductData,
   });
 
   return result;
@@ -531,21 +594,21 @@ const updateProductStatusIntoDB = async (payload: {
   return result;
 };
 
-const updateVendorProductIntoDB = async (
-  id: string,
-  payload: Partial<Product>
-) => {
-  console.log(id);
-  const result = await prisma.product.update({
-    where: {
-      id,
-      isDeleted: false,
-    },
-    data: payload,
-  });
+// const updateVendorProductIntoDB = async (
+//   id: string,
+//   payload: Partial<Product>
+// ) => {
+//   console.log(id);
+//   const result = await prisma.product.update({
+//     where: {
+//       id,
+//       isDeleted: false,
+//     },
+//     data: payload,
+//   });
 
-  return result;
-};
+//   return result;
+// };
 
 const deleteVendorProductFromDB = async (id: string) => {
   const result = await prisma.product.update({
@@ -566,7 +629,7 @@ export const ProductService = {
   getSingleProductFromDB,
   createProductIntoDB,
   getVendorShopProductsFromDB,
-  updateVendorProductIntoDB,
+  updateProductIntoDB,
   deleteVendorProductFromDB,
   getAllFeaturedProductsFromDB,
   getAllFlashProductsFromDB,

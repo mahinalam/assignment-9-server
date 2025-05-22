@@ -177,20 +177,19 @@ const getAllVendorProducts = catchAsync(async (req, res) => {
 //   });
 // });
 
-const updateVendorShopProduct = catchAsync(
-  async (req: Request, res: Response) => {
-    const { id } = req.params;
+const updateProductIntoDB = catchAsync(async (req: Request, res: Response) => {
+  const result = await ProductService.updateProductIntoDB(
+    req.body,
+    req.files as TImageFiles
+  );
 
-    const result = await ProductService.updateVendorProductIntoDB(id, req.body);
-
-    sendResponse(res, {
-      statusCode: 200,
-      success: true,
-      message: "Product Updated successfuly!",
-      data: result,
-    });
-  }
-);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Product Updated successfuly!",
+    data: result,
+  });
+});
 
 // update product status
 const updateProductStatus = catchAsync(async (req: Request, res: Response) => {
@@ -224,7 +223,7 @@ export const ProductController = {
   getSingleProductFromDB,
   createProduct,
   getAllVendorProducts,
-  updateVendorShopProduct,
+  updateProductIntoDB,
   deleteVendorShopProduct,
   getAllFeaturedProducts,
   getAllFlashProducts,

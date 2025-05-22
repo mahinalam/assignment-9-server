@@ -40,8 +40,7 @@ const clearCart = catchAsync(async (req, res) => {
 });
 
 const userCart = catchAsync(async (req, res) => {
-  const { userId } = req.user;
-  const orders = await CartService.getUserCart(userId);
+  const orders = await CartService.getUserCart(req?.user?.userId);
 
   sendResponse(res, {
     success: true,

@@ -36,7 +36,13 @@ const createShop = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getVendorShop = catchAsync(async (req, res) => {
-  const result = await ShopService.getVendorShop(req.user);
+  const paginationOption = pick(req.query, [
+    "limit",
+    "page",
+    "sortBy",
+    "sortOrder",
+  ]);
+  const result = await ShopService.getVendorShop(paginationOption, req.user);
 
   sendResponse(res, {
     success: true,

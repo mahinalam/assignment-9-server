@@ -17,9 +17,18 @@ router.post(
   "/",
   auth(UserRole.VENDOR),
   multerUpload.fields([{ name: "itemImages" }]),
-  validateImageFileRequest(ImageFilesArrayZodSchema),
+  // validateImageFileRequest(ImageFilesArrayZodSchema),
   parseBody,
   ProductController.createProduct
+);
+
+router.put(
+  "/",
+  auth(UserRole.VENDOR),
+  multerUpload.fields([{ name: "itemImages" }]),
+  // validateImageFileRequest(ImageFilesArrayZodSchema),
+  parseBody,
+  ProductController.updateProductIntoDB
 );
 
 router.get("/vendor-products/:id", ProductController.getAllVendorProducts);

@@ -171,8 +171,13 @@ const getProductSpecificReviews = async (
   };
 };
 
-const getAllVendorProductsReviews = async (email: string) => {
+const getAllVendorProductsReviews = async (
+  paginationOption: any,
+  email: string
+) => {
   // check is vendor exits
+  const { limit, page, skip, sortBy, sortOrder } =
+    paginationHelper.calculatePagination(paginationOption);
   const isVendorExists = await prisma.vendor.findUnique({
     where: {
       email,
@@ -223,9 +228,29 @@ const getAllVendorProductsReviews = async (email: string) => {
       createdAt: true,
       updatedAt: true,
     },
+    skip: skip,
+    take: limit,
+
+    orderBy: {
+      [sortBy || "createdAt"]: sortOrder || "desc",
+    },
   });
 
-  return vendorProducts;
+  const total = await prisma.review.count({
+    where: {
+      shopId: isVendorExists?.shop?.id,
+      isDeleted: false, // Match the Vendor's `ownerId`
+    },
+  });
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: vendorProducts,
+  };
 };
 
 const getUserProductReview = async (userId: string) => {

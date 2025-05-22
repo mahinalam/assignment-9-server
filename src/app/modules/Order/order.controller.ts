@@ -18,8 +18,17 @@ const createOrder = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getVendorOrderHistory = catchAsync(async (req, res) => {
+  const paginationOption = pick(req.query, [
+    "limit",
+    "page",
+    "sortBy",
+    "sortOrder",
+  ]);
   const { email } = req.user;
-  const orders = await OrderService.getVendorOrderHistory(email);
+  const orders = await OrderService.getVendorOrderHistory(
+    paginationOption,
+    email
+  );
 
   sendResponse(res, {
     success: true,
@@ -91,6 +100,20 @@ const updateOrderStatus = catchAsync(async (req, res) => {
   });
 });
 
+// delete order
+const deleteOrder = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { email } = req.user;
+  const result = await OrderService.deleteOrderFromDB(email, id);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Order deleted successfuly!",
+    data: result,
+  });
+});
+
 export const OrderController = {
   createOrder,
   getVendorOrderHistory,
@@ -98,4 +121,5 @@ export const OrderController = {
   getAllOrderHistory,
   getUserUnconfirmOrder,
   updateOrderStatus,
+  deleteOrder,
 };

@@ -134,6 +134,14 @@ const getUserCart = async (userId: string) => {
       isDeleted: false,
     },
   });
+  if (!isCustomerExists) {
+    return {
+      cart: null,
+      cartItems: [],
+      totalQuantity: 0,
+      totalPrice: 0,
+    };
+  }
   // Fetch the cart along with its items
   const cart = await prisma.cart.findUnique({
     where: { customerId: isCustomerExists.id },

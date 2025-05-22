@@ -11,6 +11,7 @@ import { FollowingShopRoute } from "../modules/FollowingShop/followingShop.route
 import { BrandRoute } from "../modules/Brand/brand.route";
 import { CouponRoute } from "../modules/Coupon/coupon.route";
 import { CartRoute } from "../modules/Cart/cart.route";
+import { WishlistRoute } from "../modules/Wishlist/wishlist.route";
 
 const router = express.Router();
 
@@ -58,6 +59,10 @@ const moduleRoutes = [
   {
     path: "/cart",
     route: CartRoute,
+  },
+  {
+    path: "/wishlist",
+    route: WishlistRoute,
   },
 ];
 

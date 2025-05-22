@@ -2,6 +2,7 @@ import { Order, OrderItem } from "@prisma/client";
 import prisma from "../../../sharred/prisma";
 import { initiatePayment } from "../Payment/payment.utils";
 import { paginationHelper } from "../../../helpers/paginationHelper";
+import ApiError from "../../errors/ApiError";
 
 // const createOrderIntoDB = async (payload: any) => {
 //   const {
@@ -158,26 +159,6 @@ export const createOrderIntoDB = async (userId: any, payload: any) => {
     return total + Number(item.price) * Number(item.quantity);
   }, 0);
 
-  // const existingOrder = await prisma.order.findFirst({
-  //   where: {
-  //     customerEmail,
-  //   },
-  // });
-
-  //   const additionalItems = orderItems.map((item) => ({
-  //     orderId: existingOrder.id,
-  //     productId: item.productId,
-  //     quantity: item.quantity,
-  //     price: item.price,
-  //   }));
-
-  //   await prisma.orderItem.createMany({
-  //     data: additionalItems,
-  //   });
-
-  //   // Just return the existing order
-  //   return existingOrder;
-
   const transactionId = `txn_${Date.now()}_${Math.random()
     .toString(36)
     .substring(2, 10)}`;
@@ -252,7 +233,9 @@ export const createOrderIntoDB = async (userId: any, payload: any) => {
   return result;
 };
 
-const getVendorOrderHistory = async (email: string) => {
+const getVendorOrderHistory = async (paginationOption: any, email: string) => {
+  const { limit, page, skip, sortBy, sortOrder } =
+    paginationHelper.calculatePagination(paginationOption);
   // check is vendor exists
   const isVendorExists = await prisma.vendor.findUnique({
     where: {
@@ -288,24 +271,31 @@ const getVendorOrderHistory = async (email: string) => {
               transactionId: true,
               status: true,
             },
+            skip: skip,
+            take: limit,
+            orderBy: {
+              [sortBy || "createdAt"]: sortOrder || "desc",
+            },
           },
         },
       },
     },
   });
-  // const orders = await prisma.order.findMany({
-  //   where: {
-  //     shop: {
-  //       vendorId,
-  //     },
-  //   },
-  //   include: {
-  //     orderItem: true,
-  //     shop: true,
-  //   },
-  // });
 
-  return isVendorExists;
+  const total = await prisma.order.count({
+    where: {
+      shopId: isVendorExists?.shop?.id,
+    },
+  });
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: isVendorExists,
+  };
 };
 
 const getAllCategoriesFromDB = async (paginationOption: any) => {
@@ -367,14 +357,23 @@ const getUsersOrderHistory = async (email: string, paginationOption: any) => {
   const orders = await prisma.order.findMany({
     where: {
       customerEmail: email,
+      isDeleted: false,
     },
     include: {
       orderItem: {
+        where: {
+          isDeleted: false,
+        },
         include: {
           product: true,
         },
       },
       payment: true,
+    },
+    skip: skip,
+    take: limit,
+    orderBy: {
+      [sortBy || "createdAt"]: sortOrder || "desc",
     },
   });
 
@@ -384,6 +383,7 @@ const getUsersOrderHistory = async (email: string, paginationOption: any) => {
     },
   });
 
+  console.log("orders", orders);
   return {
     meta: {
       page,
@@ -550,6 +550,46 @@ const updateOrder = async (
   return paymentSession;
 };
 
+// delete order
+const deleteOrderFromDB = async (
+  customerEmail: string,
+  orderItemId: string
+) => {
+  // check if order exists
+  const isOrderExists = await prisma.order.findFirst({
+    where: {
+      isDeleted: false,
+      customerEmail,
+    },
+  });
+
+  if (!isOrderExists) {
+    throw new ApiError(404, "Order doesn't exists.");
+  }
+
+  // check is order item exists
+  const isOrderItemExists = await prisma.orderItem.findFirst({
+    where: {
+      id: orderItemId,
+      isDeleted: false,
+    },
+  });
+
+  if (!isOrderItemExists) {
+    throw new ApiError(404, "Order Item doesn't exists.");
+  }
+  const result = await prisma.orderItem.update({
+    where: {
+      id: isOrderItemExists.id,
+      isDeleted: false,
+    },
+    data: {
+      isDeleted: true,
+    },
+  });
+  return result;
+};
+
 export const OrderService = {
   createOrderIntoDB,
   getVendorOrderHistory,
@@ -557,4 +597,5 @@ export const OrderService = {
   getAllOrderHistory,
   getUserUnConfirmOrder,
   updateOrder,
+  deleteOrderFromDB,
 };

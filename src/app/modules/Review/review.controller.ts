@@ -68,8 +68,17 @@ const getProductSpecificReviews = catchAsync(async (req, res) => {
 });
 
 const getVendorProductsReviews = catchAsync(async (req, res) => {
+  const paginationOption = pick(req.query, [
+    "limit",
+    "page",
+    "sortBy",
+    "sortOrder",
+  ]);
   const { email } = req.user;
-  const reviews = await ReviewService.getAllVendorProductsReviews(email);
+  const reviews = await ReviewService.getAllVendorProductsReviews(
+    paginationOption,
+    email
+  );
 
   sendResponse(res, {
     success: true,

@@ -29,6 +29,7 @@ router.get(
   auth(UserRole.CUSTOMER),
   OrderController.getUserUnconfirmOrder
 );
+router.delete("/:id", auth(UserRole.CUSTOMER), OrderController.deleteOrder);
 // router.put(
 //   "/update-order",
 //   auth(UserRole.CUSTOMER, UserRole.ADMIN, UserRole.ADMIN),

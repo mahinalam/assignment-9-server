@@ -284,6 +284,7 @@ model User {
   customer  Customer?
   vendor    Vendor?
   admin     Admin?
+  wishlist  Wishlist?
 
   @@map("users")
 }
@@ -406,12 +407,13 @@ model Product {
   brandId     String?
   categoryId  String
 
-  shop      Shop        @relation(fields: [shopId], references: [id])
-  brand     Brand?      @relation(fields: [brandId], references: [id])
-  category  Category    @relation(fields: [categoryId], references: [id])
-  cartItem  CartItem[]
-  orderItem OrderItem[]
-  review    Review[]
+  shop         Shop           @relation(fields: [shopId], references: [id])
+  brand        Brand?         @relation(fields: [brandId], references: [id])
+  category     Category       @relation(fields: [categoryId], references: [id])
+  cartItem     CartItem[]
+  orderItem    OrderItem[]
+  review       Review[]
+  wishlistItem WishlistItem[]
 
   @@map("products")
 }
@@ -550,6 +552,31 @@ model Review {
   shop     Shop     @relation(fields: [shopId], references: [id])
 
   @@map("reviews")
+}
+
+model Wishlist {
+  id           String         @id @default(uuid())
+  userId       String         @unique
+  user         User           @relation(fields: [userId], references: [id])
+  wishlistItem WishlistItem[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  isDeleted    Boolean        @default(false)
+
+  @@map("wish_lists")
+}
+
+model WishlistItem {
+  wishlistId String
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id])
+  wishlist   Wishlist @relation(fields: [wishlistId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  isDeleted  Boolean  @default(false)
+
+  @@id([wishlistId, productId])
+  @@map("wish_list_items")
 }
 
 enum UserRole {
