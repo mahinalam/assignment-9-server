@@ -40,6 +40,17 @@ const createReview = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const createPublicReview = catchAsync(async (req: Request, res: Response) => {
+  const result = await ReviewService.createPublicReviewIntoDB(req.body);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Reviews Added successfuly!",
+    data: result,
+  });
+});
+
 const getProductSpecificReviews = catchAsync(async (req, res) => {
   console.log("authorization", req.headers.authorization);
   //pick
@@ -88,21 +99,31 @@ const getVendorProductsReviews = catchAsync(async (req, res) => {
   });
 });
 const getUserProductReview = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const reviews = await ReviewService.getUserProductReview(id);
+  const paginationOption = pick(req.query, [
+    "limit",
+    "page",
+    "sortBy",
+    "sortOrder",
+  ]);
+
+  const { userId } = req.user;
+  const reviews = await ReviewService.getUserProductReview(
+    userId,
+    paginationOption
+  );
 
   sendResponse(res, {
     success: true,
     statusCode: 200,
-    message: "Reviews retrieved successfully",
+    message: "Users reviews retrieved successfully",
     data: reviews,
   });
 });
 
-const deleteReview = catchAsync(async (req: Request, res: Response) => {
+const deleteUserReview = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
 
-  const result = await ReviewService.deleteReviewFromDB(id);
+  const result = await ReviewService.deleteUserReviewFromDB(id);
 
   sendResponse(res, {
     statusCode: 200,
@@ -118,5 +139,6 @@ export const ReviewController = {
   getProductSpecificReviews,
   getVendorProductsReviews,
   getUserProductReview,
-  deleteReview,
+  deleteUserReview,
+  createPublicReview,
 };

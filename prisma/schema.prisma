@@ -274,37 +274,38 @@ datasource db {
 }
 
 model User {
-  id        String    @id @default(uuid())
-  email     String    @unique
-  password  String
-  role      UserRole  @default(CUSTOMER)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  isDeleted Boolean   @default(false)
-  customer  Customer?
-  vendor    Vendor?
-  admin     Admin?
-  wishlist  Wishlist?
+  id            String          @id @default(uuid())
+  email         String          @unique
+  password      String
+  role          UserRole        @default(CUSTOMER)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  isDeleted     Boolean         @default(false)
+  customer      Customer?
+  vendor        Vendor?
+  admin         Admin?
+  wishlist      Wishlist?
+  followingShop FollowingShop[]
 
   @@map("users")
 }
 
 model Customer {
-  id            String          @id @default(uuid())
-  userId        String          @unique
-  email         String          @unique
-  name          String
-  phoneNumber   String?
-  profilePhoto  String?
-  address       String?
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  isDeleted     Boolean         @default(false)
-  gender        Gender?
-  user          User            @relation(fields: [userId], references: [id])
-  followingShop FollowingShop[]
-  Cart          Cart?
-  review        Review[]
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  email        String   @unique
+  name         String
+  phoneNumber  String?
+  profilePhoto String?
+  address      String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  isDeleted    Boolean  @default(false)
+  gender       Gender?
+  user         User     @relation(fields: [userId], references: [id])
+
+  Cart   Cart?
+  review Review[]
 
   @@map("customers")
 }
@@ -414,6 +415,7 @@ model Product {
   orderItem    OrderItem[]
   review       Review[]
   wishlistItem WishlistItem[]
+  compareItem  CompareItem[]
 
   @@map("products")
 }
@@ -432,16 +434,16 @@ model Coupon {
 }
 
 model FollowingShop {
-  customerId String
-  shopId     String
-  isDeleted  Boolean  @default(false)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  userId    String
+  shopId    String
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  customer Customer @relation(fields: [customerId], references: [id])
-  shop     Shop     @relation(fields: [shopId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+  shop Shop @relation(fields: [shopId], references: [id])
 
-  @@id([customerId, shopId]) // This defines a composite primary key
+  @@id([userId, shopId]) // This defines a composite primary key
   @@map("following_shops") // (Optional) Custom table name in the database
 }
 
@@ -538,18 +540,20 @@ model Review {
   id         String   @id @default(uuid())
   rating     Int
   comment    String?
+  email      String?
+  name       String?
   images     String[] @default([])
-  productId  String
-  customerId String
-  shopId     String
+  productId  String?
+  customerId String?
+  shopId     String?
 
   isDeleted Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  product  Product  @relation(fields: [productId], references: [id])
-  customer Customer @relation(fields: [customerId], references: [id])
-  shop     Shop     @relation(fields: [shopId], references: [id])
+  product  Product?  @relation(fields: [productId], references: [id])
+  customer Customer? @relation(fields: [customerId], references: [id])
+  shop     Shop?     @relation(fields: [shopId], references: [id])
 
   @@map("reviews")
 }
@@ -577,6 +581,38 @@ model WishlistItem {
 
   @@id([wishlistId, productId])
   @@map("wish_list_items")
+}
+
+model Compare {
+  id          String        @id @default(uuid())
+  userId      String        @unique
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  isDeleted   Boolean       @default(false)
+  compareItem CompareItem[]
+
+  @@map("compare")
+}
+
+model CompareItem {
+  compareId String
+  productId String
+  compare   Compare  @relation(fields: [compareId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
+
+  @@id([compareId, productId])
+  @@map("compare_item")
+}
+
+model Contact {
+  id      String @id @default(ulid())
+  email   String
+  name    String
+  subject String
+  message String
 }
 
 enum UserRole {

@@ -10,28 +10,33 @@ import { ReviewController } from "./review.controller";
 const router = express.Router();
 
 router.get("/", auth(UserRole.ADMIN), ReviewController.getAllReviews);
-router.post(
-  "/",
-  auth(UserRole.CUSTOMER),
-  multerUpload.fields([{ name: "reviewImages" }]),
-  validateImageFileRequest(ImageFilesArrayZodSchema),
-  parseBody,
-  ReviewController.createReview
-);
-
 router.get(
   "/vendor-products-reviews",
   auth(UserRole.VENDOR),
   ReviewController.getVendorProductsReviews
 );
-// router.get("/user-products-reviews/:id", ReviewController.getUserProductReview);
+
+router.get(
+  "/user-reviews/",
+  auth(UserRole.CUSTOMER),
+  ReviewController.getUserProductReview
+);
 
 router.get("/product/review", ReviewController.getProductSpecificReviews);
+router.post(
+  "/",
+  auth(UserRole.CUSTOMER),
+  multerUpload.fields([{ name: "reviewImages" }]),
+  // validateImageFileRequest(ImageFilesArrayZodSchema),
+  parseBody,
+  ReviewController.createReview
+);
+router.post("/public", ReviewController.createPublicReview);
 
 router.delete(
   "/:id",
-  auth(UserRole.VENDOR, UserRole.ADMIN),
-  ReviewController.deleteReview
+  auth(UserRole.CUSTOMER),
+  ReviewController.deleteUserReview
 );
 
 export const ReviewRoute = router;

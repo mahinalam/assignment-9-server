@@ -56,9 +56,26 @@ const getUsersWishlistsFromDB = async (
       userId,
       isDeleted: false,
     },
-    include: {
+    select: {
+      id: true,
       wishlistItem: {
         where: { isDeleted: false },
+        select: {
+          createdAt: true,
+          product: {
+            select: {
+              id: true,
+              name: true,
+              images: true,
+              price: true,
+              category: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          },
+        },
       },
     },
     skip: skip,

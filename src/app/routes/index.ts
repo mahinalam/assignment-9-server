@@ -12,6 +12,8 @@ import { BrandRoute } from "../modules/Brand/brand.route";
 import { CouponRoute } from "../modules/Coupon/coupon.route";
 import { CartRoute } from "../modules/Cart/cart.route";
 import { WishlistRoute } from "../modules/Wishlist/wishlist.route";
+import { ContactRoute } from "../modules/Contact/contact.route";
+import { CompareRoute } from "../modules/Compare/compare.route";
 
 const router = express.Router();
 
@@ -63,6 +65,14 @@ const moduleRoutes = [
   {
     path: "/wishlist",
     route: WishlistRoute,
+  },
+  {
+    path: "/contact",
+    route: ContactRoute,
+  },
+  {
+    path: "/compare",
+    route: CompareRoute,
   },
 ];
 

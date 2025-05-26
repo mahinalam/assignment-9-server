@@ -275,12 +275,88 @@ const getVendorShop = async (paginationOption: any, user: JwtPayload) => {
   };
 };
 
-const followShop = async (followerId: string, shopId: string) => {
+const followShop = async (userId: string, shopId: string) => {
+  // check is shop exist
+  await prisma.shop.findUniqueOrThrow({
+    where: {
+      id: shopId,
+    },
+  });
+  // is alreday following
+
   const result = await prisma.followingShop.create({
-    data: { followerId, shopId },
+    data: { userId, shopId },
   });
 
   return result;
+};
+
+const unFollowShopIntoDB = async (userId: string, shopId: string) => {
+  console.log("userid", userId);
+  console.log("shop", shopId);
+  // check is shop exist
+  await prisma.shop.findFirstOrThrow({
+    where: {
+      id: shopId,
+      isDeleted: false,
+    },
+  });
+  const result = await prisma.followingShop.delete({
+    where: {
+      userId_shopId: {
+        userId,
+        shopId,
+      },
+      isDeleted: false,
+    },
+  });
+
+  return result;
+};
+
+// get all folowing shop
+const getAllFollowingShops = async (userId: string, paginationOption: any) => {
+  const { limit, page, skip, sortBy, sortOrder } =
+    paginationHelper.calculatePagination(paginationOption);
+  const result = await prisma.followingShop.findMany({
+    where: {
+      userId,
+      isDeleted: false,
+    },
+    select: {
+      userId: true,
+      shop: {
+        select: {
+          id: true,
+          address: true,
+          logo: true,
+          name: true,
+          createdAt: true,
+          status: true,
+        },
+      },
+    },
+    skip: skip,
+    take: limit,
+    orderBy: {
+      [sortBy || "createdAt"]: sortOrder || "desc",
+    },
+  });
+
+  const total = await prisma.followingShop.count({
+    where: {
+      userId,
+      isDeleted: false,
+    },
+  });
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
 };
 
 // update shop
@@ -326,6 +402,21 @@ const updateShopIntoDB = async (
   return result;
 };
 
+const getIsFollowingShop = async (userId: string, shopId: string) => {
+  const isFollowing = await prisma.followingShop.findFirst({
+    where: {
+      userId,
+      shopId,
+      isDeleted: false,
+    },
+  });
+  console.log("is following", isFollowing);
+  if (isFollowing) {
+    return { success: true };
+  } else {
+    return { success: false };
+  }
+};
 // deletevendor reviews
 const blockShopIntoDB = async (shopId: string) => {
   const result = await prisma.shop.update({
@@ -348,4 +439,7 @@ export const ShopService = {
   followShop,
   blockShopIntoDB,
   updateShopIntoDB,
+  getAllFollowingShops,
+  unFollowShopIntoDB,
+  getIsFollowingShop,
 };

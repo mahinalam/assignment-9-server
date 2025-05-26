@@ -140,13 +140,16 @@ const getProductSpecificReviews = async (
     where: whereCondition,
     skip: skip,
     take: limit,
-
-    // include: {
-    //   review: true,
-    //   brand: true,
-    //   category: true,
-    //   shop: true,
-    // },
+    include: {
+      customer: {
+        select: {
+          email: true,
+          name: true,
+          profilePhoto: true,
+          id: true,
+        },
+      },
+    },
     orderBy: {
       [sortBy || "createdAt"]: sortOrder || "desc",
     },
@@ -253,17 +256,129 @@ const getAllVendorProductsReviews = async (
   };
 };
 
-const getUserProductReview = async (userId: string) => {
-  const vendorProducts = await prisma.review.findMany({
+// const getUserProductReview = async (
+//   customerId: string,
+//   paginationOption: any
+// ) => {
+//   const { limit, page, skip, sortBy, sortOrder } =
+//     paginationHelper.calculatePagination(paginationOption);
+//   const userReviews = await prisma.review.findMany({
+//     where: {
+//       customerId,
+//       isDeleted: false, // Match the Vendor's `ownerId`
+//     },
+//     select: {
+//       id: true,
+//       images: true,
+//       createdAt: true,
+//       rating: true,
+//       product: {
+//         select: {
+//           id: true,
+//           images: true,
+//           name: true,
+//           category: {
+//             select: {
+//               name: true,
+//             },
+//           },
+//         },
+//       },
+//       customer: {
+//         select: {
+//           name: true,
+//           id: true,
+//           profilePhoto: true,
+//         },
+//       },
+//     },
+//     skip: skip,
+//     take: limit,
+
+//     orderBy: {
+//       [sortBy || "createdAt"]: sortOrder || "desc",
+//     },
+//   });
+
+//   const total = await prisma.review.count({
+//     where: {
+//       customerId,
+//       isDeleted: false, // Match the Vendor's `ownerId`
+//     },
+//   });
+
+//   return {
+//     meta: {
+//       page,
+//       limit,
+//       total,
+//     },
+//     data: userReviews,
+//   };
+// };
+
+const getUserProductReview = async (userId: string, paginationOption: any) => {
+  const { limit, page, skip, sortBy, sortOrder } =
+    paginationHelper.calculatePagination(paginationOption);
+  const userReviews = await prisma.review.findMany({
     where: {
-      userId, // Match the Vendor's `ownerId`
+      customer: {
+        userId,
+      },
+      isDeleted: false,
     },
-    include: {
-      product: true,
+    select: {
+      id: true,
+      images: true,
+      createdAt: true,
+      rating: true,
+      comment: true,
+      product: {
+        select: {
+          id: true,
+          images: true,
+          name: true,
+          category: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
+      customer: {
+        select: {
+          name: true,
+          id: true,
+          profilePhoto: true,
+          email: true,
+        },
+      },
+    },
+    skip: skip,
+    take: limit,
+
+    orderBy: {
+      [sortBy || "createdAt"]: sortOrder || "desc",
     },
   });
 
-  return vendorProducts;
+  const total = await prisma.review.count({
+    where: {
+      customer: {
+        userId,
+      },
+      isDeleted: false, // Match the Vendor's `ownerId`
+    },
+  });
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: userReviews,
+  };
 };
 
 const createReviewIntoDB = async (
@@ -280,7 +395,7 @@ const createReviewIntoDB = async (
     throw new ApiError(404, "Customer not found");
   }
 
-  if (images && images.reviewImages.length > 0) {
+  if (images && images?.reviewImages?.length > 0) {
     payload.images = images.reviewImages.map((image: TImageFile) => image.path);
   } else {
     payload.images = [];
@@ -293,8 +408,29 @@ const createReviewIntoDB = async (
   return result;
 };
 
-// deletevendor reviews
-const deleteReviewFromDB = async (id: string) => {
+const createPublicReviewIntoDB = async (payload: any) => {
+  console.log("public review", payload);
+  const result = await prisma.review.create({
+    data: payload,
+  });
+
+  return result;
+};
+
+// delete user reviews
+const deleteUserReviewFromDB = async (id: string) => {
+  // is review exists
+  const isReviewExists = await prisma.review.findFirst({
+    where: {
+      isDeleted: false,
+      id,
+    },
+  });
+
+  if (!isReviewExists) {
+    throw new ApiError(404, "Review not found!");
+  }
+
   const result = await prisma.review.update({
     where: {
       id,
@@ -308,11 +444,39 @@ const deleteReviewFromDB = async (id: string) => {
   return result;
 };
 
+// delete user reviews
+// const deleteUserReviewFromDB = async (id: string) => {
+//   // is review exists
+//   const isReviewExists = await prisma.review.findFirst({
+//     where: {
+//       isDeleted: false,
+//       id,
+//     },
+//   });
+
+//   if (!isReviewExists) {
+//     throw new ApiError(404, "Review not found!");
+//   }
+
+//   const result = await prisma.review.update({
+//     where: {
+//       id,
+//       isDeleted: false,
+//     },
+//     data: {
+//       isDeleted: true,
+//     },
+//   });
+
+//   return result;
+// };
+
 export const ReviewService = {
   getAllReviewsFromDB,
   getAllVendorProductsReviews,
   createReviewIntoDB,
   getProductSpecificReviews,
   getUserProductReview,
-  deleteReviewFromDB,
+  deleteUserReviewFromDB,
+  createPublicReviewIntoDB,
 };

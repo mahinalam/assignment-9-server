@@ -157,7 +157,7 @@ export const createOrderIntoDB = async (userId: any, payload: any) => {
 
   const totalPrice = orderItems.reduce((total: number, item: any) => {
     return total + Number(item.price) * Number(item.quantity);
-  }, 0);
+  }, 100);
 
   const transactionId = `txn_${Date.now()}_${Math.random()
     .toString(36)
@@ -295,30 +295,6 @@ const getVendorOrderHistory = async (paginationOption: any, email: string) => {
       total,
     },
     data: isVendorExists,
-  };
-};
-
-const getAllCategoriesFromDB = async (paginationOption: any) => {
-  const { limit, page, skip, sortBy, sortOrder } =
-    paginationHelper.calculatePagination(paginationOption);
-
-  const result = await prisma.category.findMany({
-    where: { isDeleted: false },
-    skip: skip,
-    take: limit,
-    orderBy: {
-      [sortBy || "createdAt"]: sortOrder || "desc",
-    },
-  });
-
-  const total = await prisma.category.count();
-  return {
-    meta: {
-      page,
-      limit,
-      total,
-    },
-    data: result,
   };
 };
 

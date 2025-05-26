@@ -71,6 +71,7 @@ const getAllShop = catchAsync(async (req, res) => {
 
 const followShop = catchAsync(async (req: Request, res: Response) => {
   const { userId } = req.user;
+  const { id } = req.params;
   const result = await ShopService.followShop(userId, req.body.shopId);
 
   sendResponse(res, {
@@ -81,19 +82,26 @@ const followShop = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-// update shop
-// const updateShop = catchAsync(async (req: Request, res: Response) => {
-//   const { id } = req.params;
+const getUsersFollowingShop = catchAsync(async (req, res) => {
+  const { userId } = req.user;
+  const paginationOption = pick(req.query, [
+    "limit",
+    "page",
+    "sortBy",
+    "sortOrder",
+  ]);
+  const result = await ShopService.getAllFollowingShops(
+    userId,
+    paginationOption
+  );
 
-//   const result = await ShopService.updateShopIntoDB(id, req.body);
-
-//   sendResponse(res, {
-//     statusCode: 200,
-//     success: true,
-//     message: "Shop updated successfully!",
-//     data: result,
-//   });
-// });
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    message: " Following shops retrieved successfully.",
+    data: result,
+  });
+});
 
 const updateShop = catchAsync(async (req: Request, res: Response) => {
   const { userId } = req.user;
@@ -125,6 +133,34 @@ const blockShop = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const unfollowShop = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { userId } = req.user;
+
+  const result = await ShopService.unFollowShopIntoDB(userId, id);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Successfully unfollowed the shop!",
+    data: result,
+  });
+});
+// check is following shop
+const getIsFollowingShop = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { userId } = req.user;
+
+  const result = await ShopService.getIsFollowingShop(userId, id);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Sucessfully chcek follower",
+    data: result,
+  });
+});
+
 export const ShopController = {
   createShop,
   getVendorShop,
@@ -132,4 +168,7 @@ export const ShopController = {
   followShop,
   blockShop,
   updateShop,
+  getUsersFollowingShop,
+  unfollowShop,
+  getIsFollowingShop,
 };

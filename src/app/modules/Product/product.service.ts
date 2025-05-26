@@ -211,6 +211,12 @@ const getAllFlashProductsFromDB = async (paginationOption: any) => {
           name: true,
         },
       },
+      review: {
+        select: {
+          comment: true,
+          createdAt: true,
+        },
+      },
       price: true,
       stock: true,
       images: true,
@@ -514,6 +520,12 @@ const getSingleProductFromDB = async (productId: string) => {
           id: true,
           images: true,
           rating: true,
+        },
+      },
+      category: {
+        select: {
+          id: true,
+          name: true,
         },
       },
     },
