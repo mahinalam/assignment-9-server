@@ -9,19 +9,6 @@ import { TImageFile } from "../../interfaces/file";
 import pick from "../../../sharred/pick";
 import { CompareService } from "./compare.service";
 
-const createCompare = catchAsync(async (req: Request, res: Response) => {
-  const { productId } = req.body;
-  const { userId } = req.user;
-  const result = await CompareService.createCompareIntoDB(userId, productId);
-
-  sendResponse(res, {
-    statusCode: 200,
-    success: true,
-    message: "Compare Created successfuly!",
-    data: result,
-  });
-});
-
 const getUsersCompare = catchAsync(async (req, res) => {
   const { userId } = req.user;
 
@@ -32,6 +19,19 @@ const getUsersCompare = catchAsync(async (req, res) => {
     statusCode: 200,
     message: "Compare products retrieved successfully",
     data: compareProducts,
+  });
+});
+
+const createCompare = catchAsync(async (req: Request, res: Response) => {
+  const { productId } = req.body;
+  const { userId } = req.user;
+  const result = await CompareService.createCompareIntoDB(userId, productId);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Compare Created successfuly!",
+    data: result,
   });
 });
 

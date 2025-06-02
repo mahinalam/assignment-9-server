@@ -8,6 +8,6 @@ const router = express.Router();
 router.get("/", auth(UserRole.CUSTOMER), CompareController.getUsersCompare);
 router.post("/", auth(UserRole.CUSTOMER), CompareController.createCompare);
 
-router.delete("/:id", CompareController.deleteCompare);
+router.delete("/:id", auth(UserRole.CUSTOMER), CompareController.deleteCompare);
 
 export const CompareRoute = router;

@@ -10,7 +10,13 @@ import { TImageFile } from "../../interfaces/file";
 import pick from "../../../sharred/pick";
 
 const createCategory = catchAsync(async (req: Request, res: Response) => {
-  const result = await CategoryService.createCategoryIntoDB(req.body);
+  if (!req.file) {
+    throw new ApiError(400, "Please upload an image");
+  }
+  const result = await CategoryService.createCategoryIntoDB(
+    req.body,
+    req.file as TImageFile
+  );
 
   sendResponse(res, {
     statusCode: 200,

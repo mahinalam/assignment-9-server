@@ -151,6 +151,7 @@ const getSingleUser = catchAsync(async (req, res) => {
 // create customer
 const createCustomer = catchAsync(async (req: Request, res: Response) => {
   const { user, customer } = req.body;
+
   const result = await UserService.createCustomerIntoDB(user, customer);
   sendResponse(res, {
     statusCode: 200,
@@ -162,8 +163,9 @@ const createCustomer = catchAsync(async (req: Request, res: Response) => {
 
 // create vendor
 const createVendor = catchAsync(async (req: Request, res: Response) => {
-  const { user, vendor } = req.body;
-  const result = await UserService.createVendorIntoDB(user, vendor);
+  const { user, vendor, shop } = req.body;
+
+  const result = await UserService.createVendorIntoDB(user, vendor, shop);
   sendResponse(res, {
     statusCode: 200,
     success: true,
@@ -187,6 +189,41 @@ const updateMyProfile = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getVendorStats = catchAsync(async (req, res) => {
+  const { userId } = req.user;
+  const result = await UserService.getVendorStats(userId);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    message: "Vendor stats retrived successfully",
+    data: result,
+  });
+});
+
+const getUserStats = catchAsync(async (req, res) => {
+  const { email } = req.user;
+  const result = await UserService.getUserStats(email);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    message: "User stats retrieved successfully",
+    data: result,
+  });
+});
+
+const getAdminStats = catchAsync(async (req, res) => {
+  const result = await UserService.getAdminStats();
+
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    message: "Admin stats retrived successfully",
+    data: result,
+  });
+});
+
 // delete user
 const deleteUser = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
@@ -206,6 +243,8 @@ export const UserController = {
   createVendor,
   getSingleUser,
   updateMyProfile,
-
+  getVendorStats,
   deleteUser,
+  getUserStats,
+  getAdminStats,
 };

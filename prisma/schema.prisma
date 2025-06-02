@@ -1,268 +1,3 @@
-// generator client {
-//   provider = "prisma-client-js"
-// }
-
-// datasource db {
-//   provider  = "postgresql"
-//   url       = env("DATABASE_URL")
-//   directUrl = env("DIRECT_URL")
-// }
-
-// model User {
-//   id           String     @id @default(uuid())
-//   name         String
-//   email        String     @unique
-//   password     String
-//   role         UserRole
-//   phoneNumber  String?
-//   profilePhoto String?
-//   address      String?
-//   status       UserStatus @default(ACTIVE)
-//   createdAt    DateTime   @default(now())
-//   updatedAt    DateTime   @updatedAt
-//   isDeleted    Boolean    @default(false)
-//   gender       String?
-
-//   shop   Shop?
-//   review Review[]
-
-//   followingShop FollowingShop[]
-//   cart          Cart?
-
-//   @@map("users")
-// }
-
-// model Shop {
-//   id          String   @id @default(uuid())
-//   name        String
-//   description String?
-//   address     String
-//   logo        String?
-//   createdAt   DateTime @default(now())
-//   updatedAt   DateTime @updatedAt
-//   isDeleted   Boolean  @default(false)
-
-//   ownerId       String          @unique
-//   owner         User            @relation(fields: [ownerId], references: [id])
-//   products      Product[]
-//   followingShop FollowingShop[]
-//   order         Order[]
-//   cart          Cart[]
-// }
-
-// model Category {
-//   id        String    @id @default(uuid())
-//   name      String    @unique
-//   imageUrl  String?
-//   isDeleted Boolean   @default(false)
-//   createdAt DateTime  @default(now())
-//   updatedAt DateTime  @updatedAt
-//   product   Product[]
-
-//   @@map("categories")
-// }
-
-// model Brand {
-//   id          String    @id @default(uuid())
-//   name        String    @unique
-//   logoUrl     String?
-//   description String    @default("")
-//   isDeleted   Boolean   @default(false)
-//   createdAt   DateTime  @default(now())
-//   updatedAt   DateTime  @updatedAt
-//   product     Product[]
-
-//   @@map("brands")
-// }
-
-// model Product {
-//   id          String      @id @default(uuid())
-//   name        String
-//   description String?
-//   price       Int
-//   discount    Int?        @default(0)
-//   stock       Int
-//   isFlashed   Boolean     @default(false)
-//   isFeatured  Boolean     @default(false)
-//   images      String[]    @default([])
-//   isDeleted   Boolean     @default(false)
-//   createdAt   DateTime    @default(now())
-//   updatedAt   DateTime    @updatedAt
-//   shop        Shop?       @relation(fields: [shopId], references: [id])
-//   shopId      String?
-//   brandId     String?
-//   brand       Brand?      @relation(fields: [brandId], references: [id])
-//   categoryId  String
-//   category    Category    @relation(fields: [categoryId], references: [id])
-//   orderItem   OrderItem[]
-//   review      Review[]
-//   cartItem    CartItem[]
-
-//   @@map("products")
-// }
-
-// model Cart {
-//   id         String   @id @default(uuid())
-//   customerId String   @unique
-//   shopId     String
-//   createdAt  DateTime @default(now())
-//   updatedAt  DateTime @updatedAt
-
-//   customer  User       @relation(fields: [customerId], references: [id])
-//   shop      Shop       @relation(fields: [shopId], references: [id])
-//   cartItems CartItem[]
-// }
-
-// model CartItem {
-//   id        String   @id @default(uuid())
-//   cartId    String
-//   productId String
-//   quantity  Int      @default(1)
-//   price     Float
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-//   cart      Cart     @relation(fields: [cartId], references: [id])
-//   product   Product  @relation(fields: [productId], references: [id])
-// }
-
-// model Order {
-//   id                      String        @id @default(uuid())
-//   status                  OrderStatus   @default(PENDING)
-//   totalPrice              Float
-//   transactionId           String        @unique
-//   createdAt               DateTime      @default(now())
-//   updatedAt               DateTime      @updatedAt
-//   isDeleted               Boolean       @default(false)
-//   customerEmail           String
-//   customerName            String
-//   customerPhone           String
-//   customerShippingAddress String
-//   cutomerProfilePhoto     String?
-//   shopId                  String
-//   shop                    Shop          @relation(fields: [shopId], references: [id])
-//   orderItems              OrderItem[]
-//   payment                 Payment?
-//   paymentStatus           PaymentStatus @default(PENDING)
-//   orderStatus             OrderStatus   @default(PENDING)
-//   source                  OrderSource   @default(CART)
-// }
-
-// model OrderItem {
-//   id        String   @id @default(uuid())
-//   quantity  Int
-//   price     Float
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-//   isDeleted Boolean  @default(false)
-
-//   productId String
-
-//   product Product @relation(fields: [productId], references: [id])
-//   orderId String
-//   order   Order   @relation(fields: [orderId], references: [id])
-// }
-
-// model Coupon {
-//   id         String     @id @default(uuid()) // Unique identifier for each coupon
-//   code       String     @unique // Coupon code, e.g., "SUMMER20"
-//   discount   Float
-//   type       CouponType @default(PERCENTAGE)
-//   expiration DateTime
-//   isDeleted  Boolean    @default(false)
-//   createdAt  DateTime   @default(now())
-//   updatedAt  DateTime   @updatedAt
-
-//   @@index([code])
-// }
-
-// enum CouponType {
-//   PERCENTAGE
-//   FIXED
-// }
-
-// model Payment {
-//   id            String        @id @default(uuid())
-//   amount        Float
-//   method        PaymentMethod @default(CASH_ON_DELIVERY)
-//   status        PaymentStatus @default(PENDING)
-//   transactionId String?       @unique
-//   createdAt     DateTime      @default(now())
-//   updatedAt     DateTime      @updatedAt
-//   isDeleted     Boolean       @default(false)
-
-//   orderId String @unique
-//   order   Order  @relation(fields: [orderId], references: [id])
-
-//   @@map("payments")
-// }
-
-// model Review {
-//   id        String   @id @default(uuid())
-//   rating    Int
-//   comment   String?
-//   images    String[] @default([])
-//   createdAt DateTime @default(now())
-//   productId String
-//   product   Product  @relation(fields: [productId], references: [id])
-//   userId    String
-//   user      User     @relation(fields: [userId], references: [id])
-//   isDeleted Boolean  @default(false)
-// }
-
-// model FollowingShop {
-//   followerId String
-//   shopId     String
-
-//   user User @relation(fields: [followerId], references: [id])
-//   shop Shop @relation(fields: [shopId], references: [id])
-
-//   @@id([followerId, shopId]) // This defines a composite primary key
-//   @@map("following_shops") // (Optional) Custom table name in the database
-// }
-
-// model SubscriptionsUser {
-//   email String @unique
-// }
-
-// enum UserRole {
-//   ADMIN
-//   VENDOR
-//   USER
-// }
-
-// // Enum to define source
-// enum OrderSource {
-//   CART
-//   BUY_NOW
-// }
-
-// enum UserStatus {
-//   ACTIVE
-//   BLOCKED
-//   DELETED
-// }
-
-// enum OrderStatus {
-//   PENDING
-//   CONFIRMED
-//   SHIPPED
-//   DELIVERED
-//   CANCELED
-// }
-
-// enum PaymentMethod {
-//   CREDIT_CARD
-//   DEBIT_CARD
-//   BKASH
-//   CASH_ON_DELIVERY
-// }
-
-// enum PaymentStatus {
-//   PENDING
-//   COMPLETED
-//   FAILED
-// }
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -284,8 +19,9 @@ model User {
   customer      Customer?
   vendor        Vendor?
   admin         Admin?
-  wishlist      Wishlist?
+  wishlist      Wishlist[]
   followingShop FollowingShop[]
+  compare       Compare[]
 
   @@map("users")
 }
@@ -357,19 +93,6 @@ model Category {
   @@map("categories")
 }
 
-model Brand {
-  id          String    @id @default(uuid())
-  name        String
-  imageUrl    String
-  description String
-  isDeleted   Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  product     Product[]
-
-  @@map("brands")
-}
-
 model Shop {
   id            String          @id @default(uuid())
   name          String
@@ -392,30 +115,30 @@ model Shop {
 }
 
 model Product {
-  id          String   @id @default(uuid())
-  name        String
-  description String?
-  price       Int
-  discount    Int?     @default(0)
-  stock       Int
-  isFlashed   Boolean  @default(false)
-  isFeatured  Boolean  @default(false)
-  images      String[] @default([])
-  isDeleted   Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  shopId      String
-  brandId     String?
-  categoryId  String
+  id               String   @id @default(uuid())
+  name             String
+  price            Int
+  discount         Int?     @default(0)
+  stock            Int
+  isFlashed        Boolean  @default(false)
+  isFeatured       Boolean  @default(false)
+  images           String[] @default([])
+  isDeleted        Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  shopId           String
+  categoryId       String
+  shortDescription String?
+  features         String[]
+  longDescription  String
 
-  shop         Shop           @relation(fields: [shopId], references: [id])
-  brand        Brand?         @relation(fields: [brandId], references: [id])
-  category     Category       @relation(fields: [categoryId], references: [id])
-  cartItem     CartItem[]
-  orderItem    OrderItem[]
-  review       Review[]
-  wishlistItem WishlistItem[]
-  compareItem  CompareItem[]
+  shop      Shop        @relation(fields: [shopId], references: [id])
+  category  Category    @relation(fields: [categoryId], references: [id])
+  cartItem  CartItem[]
+  orderItem OrderItem[]
+  review    Review[]
+  wishlist  Wishlist[]
+  compare   Compare[]
 
   @@map("products")
 }
@@ -559,52 +282,38 @@ model Review {
 }
 
 model Wishlist {
-  id           String         @id @default(uuid())
-  userId       String         @unique
-  user         User           @relation(fields: [userId], references: [id])
-  wishlistItem WishlistItem[]
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  isDeleted    Boolean        @default(false)
-
-  @@map("wish_lists")
-}
-
-model WishlistItem {
-  wishlistId String
-  productId  String
-  product    Product  @relation(fields: [productId], references: [id])
-  wishlist   Wishlist @relation(fields: [wishlistId], references: [id])
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  isDeleted  Boolean  @default(false)
-
-  @@id([wishlistId, productId])
-  @@map("wish_list_items")
-}
-
-model Compare {
-  id          String        @id @default(uuid())
-  userId      String        @unique
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  isDeleted   Boolean       @default(false)
-  compareItem CompareItem[]
-
-  @@map("compare")
-}
-
-model CompareItem {
-  compareId String
+  userId    String
   productId String
-  compare   Compare  @relation(fields: [compareId], references: [id])
-  product   Product  @relation(fields: [productId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   isDeleted Boolean  @default(false)
+  user      User     @relation(fields: [userId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
 
-  @@id([compareId, productId])
-  @@map("compare_item")
+  @@id([userId, productId])
+  @@map("wish_lists")
+}
+
+model Compare {
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
+  user      User     @relation(fields: [userId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+
+  @@id([userId, productId])
+  @@map("compare")
+}
+
+model NewsLetter {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+  isDeleted Boolean  @default(false)
+
+  @@map("news_letters")
 }
 
 model Contact {
@@ -613,6 +322,8 @@ model Contact {
   name    String
   subject String
   message String
+
+  @@map("contacts")
 }
 
 enum UserRole {

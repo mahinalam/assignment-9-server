@@ -4,7 +4,7 @@ import ApiError from "../../errors/ApiError";
 import { TImageFile } from "../../interfaces/file";
 import { paginationHelper } from "../../../helpers/paginationHelper";
 
-const createCategoryIntoDB = async (payload: Category) => {
+const createCategoryIntoDB = async (payload: Category, image: TImageFile) => {
   // check is category exists
   const isCategoryExists = await prisma.category.findFirst({
     where: { name: payload.name, isDeleted: false },
@@ -17,6 +17,10 @@ const createCategoryIntoDB = async (payload: Category) => {
   if ((isCategoryExists as any)?.isDeleted) {
     throw new ApiError(400, "Category already deleted!");
   }
+  if (image) {
+    payload.imageUrl = image.path;
+  }
+
   const result = await prisma.category.create({
     data: payload,
   });

@@ -155,9 +155,21 @@ export const createOrderIntoDB = async (userId: any, payload: any) => {
   } = payload;
   console.log("from order", payload);
 
-  const totalPrice = orderItems.reduce((total: number, item: any) => {
+  // find subscription throw email
+  const isSubscribed = await prisma.newsLetter.findFirst({
+    where: {
+      email: customerEmail,
+      isDeleted: false,
+    },
+  });
+
+  let totalPrice = orderItems.reduce((total: number, item: any) => {
     return total + Number(item.price) * Number(item.quantity);
   }, 100);
+
+  if (isSubscribed) {
+    totalPrice = totalPrice * 0.8;
+  }
 
   const transactionId = `txn_${Date.now()}_${Math.random()
     .toString(36)
@@ -185,6 +197,16 @@ export const createOrderIntoDB = async (userId: any, payload: any) => {
 
     await tx.orderItem.createMany({
       data: itemsToCreate,
+    });
+
+    await tx.newsLetter.update({
+      where: {
+        email: customerEmail,
+        isDeleted: false,
+      },
+      data: {
+        isDeleted: true,
+      },
     });
 
     const isCustomerExists = await prisma.customer.findFirst({

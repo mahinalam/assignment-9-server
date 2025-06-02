@@ -8,6 +8,7 @@ export const productFilterableFields: string[] = [
   "priceMin",
   "brandId",
   "categoryId",
+  "stock",
 ];
 
 export const vendorProductFilterableFields: string[] = ["searchTerm", "shopId"];

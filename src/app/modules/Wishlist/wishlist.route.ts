@@ -6,9 +6,8 @@ import { WishlistController } from "../Wishlist/wishlist.controller";
 
 const router = express.Router();
 
-router.post("/", auth(UserRole.CUSTOMER), WishlistController.createWishlist);
-
 router.get("/", auth(UserRole.CUSTOMER), WishlistController.getUsersWishlists);
+router.post("/", auth(UserRole.CUSTOMER), WishlistController.createWishlist);
 
 router.delete(
   "/:id",
