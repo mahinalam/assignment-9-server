@@ -12,32 +12,35 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.BrandService = void 0;
+exports.NewsLetterService = void 0;
 const prisma_1 = __importDefault(require("../../../sharred/prisma"));
 const ApiError_1 = __importDefault(require("../../errors/ApiError"));
-const createBrandIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    // check is brand exists
-    const isBrandExists = yield prisma_1.default.brand.findFirst({
-        where: { name: payload.name },
-    });
-    if (isBrandExists) {
-        throw new ApiError_1.default(400, "Brand already exists!");
-    }
-    // is brand deleted
-    if (isBrandExists === null || isBrandExists === void 0 ? void 0 : isBrandExists.isDeleted) {
-        throw new ApiError_1.default(400, "Brand already deleted!");
-    }
-    const result = yield prisma_1.default.brand.create({
-        data: payload,
+const getNewsLetter = (email) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield prisma_1.default.newsLetter.findFirst({
+        where: {
+            email,
+            isDeleted: false,
+        },
     });
     return result;
 });
-const getAllBrandFromDB = () => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield prisma_1.default.brand.findMany();
+const createNewsLetter = (email) => __awaiter(void 0, void 0, void 0, function* () {
+    // checking is email exists
+    const isNewsLetterExists = yield prisma_1.default.newsLetter.findFirst({
+        where: {
+            email,
+            isDeleted: false,
+        },
+    });
+    if (isNewsLetterExists) {
+        throw new ApiError_1.default(400, "News letter alreday exists!");
+    }
+    const result = yield prisma_1.default.newsLetter.create({
+        data: { email },
+    });
     return result;
 });
-exports.BrandService = {
-    createBrandIntoDB,
-    getAllBrandFromDB,
-    //   createCustomer,
+exports.NewsLetterService = {
+    createNewsLetter,
+    getNewsLetter,
 };

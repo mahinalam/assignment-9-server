@@ -19,7 +19,6 @@ const catchAsync_1 = __importDefault(require("../../../sharred/catchAsync"));
 // import httpStatus from "http-status";
 const loginUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield auth_service_1.AuthServices.loginUser(req.body);
-    const { refreshToken } = result;
     res.cookie("refreshToken", refreshToken, {
         secure: false,
         httpOnly: true,

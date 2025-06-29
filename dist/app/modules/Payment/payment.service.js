@@ -25,14 +25,23 @@ const confirmationService = (transactionId, status) => __awaiter(void 0, void 0,
     let result;
     let message;
     if (verifyResponse && verifyResponse.pay_status === "Successful") {
-        result = yield prisma_1.default.order.update({
-            where: {
-                transactionId,
-            },
-            data: {
-                paymentStatus: "COMPLETED",
-            },
-        });
+        yield prisma_1.default.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
+            // Step 2.1: Update order status
+            const order = yield tx.order.update({
+                where: { transactionId },
+                data: {
+                    status: "CONFIRMED",
+                    paymentStatus: "COMPLETED", // Update totalPrice here if needed
+                },
+                include: { orderItem: true },
+            });
+            for (const item of order.orderItem) {
+                yield tx.product.update({
+                    where: { id: item.productId },
+                    data: { stock: { decrement: item.quantity } },
+                });
+            }
+        }));
         message = "Successfully Paid!";
     }
     else {

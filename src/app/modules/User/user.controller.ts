@@ -118,6 +118,7 @@ import sendResponse from "../../../sharred/sendResponse";
 import { UserService } from "./user.service";
 import { TImageFile } from "../../interfaces/file";
 import pick from "../../../sharred/pick";
+import ApiError from "../../errors/ApiError";
 
 const getAllUsers = catchAsync(async (req, res) => {
   const paginationOption = pick(req.query, [
@@ -165,7 +166,16 @@ const createCustomer = catchAsync(async (req: Request, res: Response) => {
 const createVendor = catchAsync(async (req: Request, res: Response) => {
   const { user, vendor, shop } = req.body;
 
-  const result = await UserService.createVendorIntoDB(user, vendor, shop);
+  const shopImage = req.file as TImageFile;
+  if (!shopImage) {
+    throw new ApiError(400, "Please upload a shop image.");
+  }
+  const result = await UserService.createVendorIntoDB(
+    user,
+    vendor,
+    shop,
+    shopImage
+  );
   sendResponse(res, {
     statusCode: 200,
     success: true,

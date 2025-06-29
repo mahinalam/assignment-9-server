@@ -7,8 +7,6 @@ import { ProductRoute } from "../modules/Product/product.route";
 import { ReviewRoute } from "../modules/Review/review.route";
 import { OrderRoute } from "../modules/Order/order.route";
 import { PaymentRoute } from "../modules/Payment/payment.route";
-import { FollowingShopRoute } from "../modules/FollowingShop/followingShop.route";
-import { BrandRoute } from "../modules/Brand/brand.route";
 import { CouponRoute } from "../modules/Coupon/coupon.route";
 import { CartRoute } from "../modules/Cart/cart.route";
 import { WishlistRoute } from "../modules/Wishlist/wishlist.route";
@@ -50,10 +48,6 @@ const moduleRoutes = [
   {
     path: "/payment",
     route: PaymentRoute,
-  },
-  {
-    path: "/brand",
-    route: BrandRoute,
   },
   {
     path: "/coupon",

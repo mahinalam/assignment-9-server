@@ -16,6 +16,7 @@ exports.CouponController = void 0;
 const catchAsync_1 = __importDefault(require("../../../sharred/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../../sharred/sendResponse"));
 const coupon_service_1 = require("./coupon.service");
+const pick_1 = __importDefault(require("../../../sharred/pick"));
 const createCoupon = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield coupon_service_1.CouponService.createCouponIntoDB(req.body);
     (0, sendResponse_1.default)(res, {
@@ -36,7 +37,13 @@ const applyCouponCode = (0, catchAsync_1.default)((req, res) => __awaiter(void 0
     });
 }));
 const allCoupon = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield coupon_service_1.CouponService.getAllCoupon();
+    const paginationOption = (0, pick_1.default)(req.query, [
+        "limit",
+        "page",
+        "sortBy",
+        "sortOrder",
+    ]);
+    const result = yield coupon_service_1.CouponService.getAllCoupon(paginationOption);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: 200,
@@ -44,8 +51,20 @@ const allCoupon = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void
         data: result,
     });
 }));
+// delete coupon
+const deleteCoupon = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    const result = yield coupon_service_1.CouponService.deleteCouponFromDB(id);
+    (0, sendResponse_1.default)(res, {
+        statusCode: 200,
+        success: true,
+        message: "Coupon deleted successfuly!",
+        data: result,
+    });
+}));
 exports.CouponController = {
     createCoupon,
     applyCouponCode,
     allCoupon,
+    deleteCoupon,
 };

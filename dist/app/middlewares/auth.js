@@ -39,11 +39,8 @@ const auth = (...requiredRoles) => {
                 email,
             },
         });
-        const status = user === null || user === void 0 ? void 0 : user.status;
-        if (status === "BLOCKED") {
-            throw new ApiError_1.default(403, "This user is blocked !");
-        }
-        if (status === "DELETED") {
+        const status = user === null || user === void 0 ? void 0 : user.isDeleted;
+        if (status) {
             throw new ApiError_1.default(403, "This user is deleted !");
         }
         if (requiredRoles && !requiredRoles.includes(role)) {

@@ -1,4 +1,8 @@
-export const productSearchAbleFields = ["name", "description"];
+export const productSearchAbleFields = [
+  "name",
+  "shortDescription",
+  "longDescription",
+];
 export const vendorProductSearchAbleFields = ["name", "description"];
 
 export const productFilterableFields: string[] = [

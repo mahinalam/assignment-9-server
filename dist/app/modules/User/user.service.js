@@ -47,41 +47,115 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserService = void 0;
 const bcrypt = __importStar(require("bcrypt"));
-const client_1 = require("@prisma/client");
 const prisma_1 = __importDefault(require("../../../sharred/prisma"));
 const ApiError_1 = __importDefault(require("../../errors/ApiError"));
-const createUserIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    // check if the user alredat exists
-    const isUserExists = yield prisma_1.default.user.findUnique({
+const paginationHelper_1 = require("../../../helpers/paginationHelper");
+const jwtHelpers_1 = require("../../../helpers/jwtHelpers");
+const config_1 = __importDefault(require("../../../config"));
+// create customer
+const createCustomerIntoDB = (userInfo, customerInfo) => __awaiter(void 0, void 0, void 0, function* () {
+    // is user exists
+    const isCustomerExists = yield prisma_1.default.user.findFirst({
         where: {
-            email: payload.email,
+            email: userInfo.email,
             isDeleted: false,
         },
     });
-    if (isUserExists) {
-        throw new ApiError_1.default(400, "User Alreday Exists!");
+    if (isCustomerExists) {
+        throw new ApiError_1.default(400, "Customer Alreday Exists!");
     }
-    const hashedPassword = yield bcrypt.hash(payload.password, 12);
-    const userData = Object.assign(Object.assign({}, payload), { password: hashedPassword });
-    const result = yield prisma_1.default.user.create({
-        data: userData,
-        select: {
-            id: true,
-            email: true,
-            name: true,
-            address: true,
-            phoneNumber: true,
-            role: true,
-            shop: true,
-            status: true,
-            review: true,
-        },
-    });
+    const hashedPassword = yield bcrypt.hash(userInfo.password, 12);
+    const result = yield prisma_1.default.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
+        const userData = yield tx.user.create({
+            data: {
+                role: "CUSTOMER",
+                email: userInfo.email,
+                password: hashedPassword,
+            },
+        });
+        const customerData = Object.assign(Object.assign({}, customerInfo), { userId: userData.id, email: userData.email });
+        yield tx.customer.create({
+            data: customerData,
+        });
+        // return customer;
+        const accessToken = jwtHelpers_1.jwtHelpers.generateToken({
+            userId: userData.id,
+            email: userData.email,
+            role: userData.role,
+        }, config_1.default.jwt.jwt_secret, config_1.default.jwt.expires_in);
+        return {
+            accessToken,
+        };
+    }));
     return result;
 });
-const getAllUsersFromDB = () => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield prisma_1.default.user.findMany();
+// create vendor
+const createVendorIntoDB = (userInfo, vendorInfo, shopInfo, shopImage) => __awaiter(void 0, void 0, void 0, function* () {
+    // is vendor exists
+    const isVendorExists = yield prisma_1.default.user.findFirst({
+        where: {
+            email: userInfo.email,
+            isDeleted: false,
+        },
+    });
+    if (isVendorExists) {
+        throw new ApiError_1.default(400, "Vendor Alreday Exists!");
+    }
+    const hashedPassword = yield bcrypt.hash(userInfo.password, 12);
+    const result = yield prisma_1.default.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
+        const userData = yield tx.user.create({
+            data: {
+                role: "VENDOR",
+                email: userInfo.email,
+                password: hashedPassword,
+            },
+        });
+        const vendorData = Object.assign(Object.assign({}, vendorInfo), { userId: userData.id, email: userData.email });
+        const vendor = yield tx.vendor.create({
+            data: vendorData,
+        });
+        if (shopInfo) {
+            shopInfo.vendorId = vendor.id;
+            shopInfo.logo = shopImage.path;
+            yield tx.shop.create({
+                data: shopInfo,
+            });
+        }
+        const accessToken = jwtHelpers_1.jwtHelpers.generateToken({
+            userId: userData.id,
+            email: userData.email,
+            role: userData.role,
+        }, config_1.default.jwt.jwt_secret, config_1.default.jwt.expires_in);
+        return {
+            accessToken,
+        };
+    }));
     return result;
+});
+const getAllUsersFromDB = (paginationOption) => __awaiter(void 0, void 0, void 0, function* () {
+    const { limit, page, skip, sortBy, sortOrder } = paginationHelper_1.paginationHelper.calculatePagination(paginationOption);
+    const result = yield prisma_1.default.user.findMany({
+        where: {
+            isDeleted: false,
+        },
+        skip: skip,
+        take: limit,
+        orderBy: {
+            [sortBy || "createdAt"]: sortOrder || "desc",
+        },
+        omit: {
+            password: true,
+        },
+    });
+    const total = yield prisma_1.default.user.count();
+    return {
+        meta: {
+            page,
+            limit,
+            total,
+        },
+        data: result,
+    };
 });
 const getSingleUserFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield prisma_1.default.user.findUniqueOrThrow({
@@ -90,46 +164,140 @@ const getSingleUserFromDB = (id) => __awaiter(void 0, void 0, void 0, function* 
             isDeleted: false,
         },
         include: {
-            shop: true,
-            review: true,
-            followingShop: {
-                include: {
-                    shop: true,
-                },
-            },
+            customer: true,
+            admin: true,
+            vendor: true,
+        },
+        omit: {
+            password: true,
         },
     });
     return result;
 });
-// admin stats
-const getAdminStats = () => __awaiter(void 0, void 0, void 0, function* () {
-    const products = yield prisma_1.default.product.count();
-    const orders = yield prisma_1.default.orderItem.count();
-    const payments = yield prisma_1.default.order.count({
+const updateMyProfile = (user, payload, image) => __awaiter(void 0, void 0, void 0, function* () {
+    if (user.role === "CUSTOMER") {
+        if (image) {
+            payload.profilePhoto = image.path;
+        }
+        const result = yield prisma_1.default.customer.update({
+            where: {
+                email: user.email,
+            },
+            data: payload,
+        });
+        return result;
+    }
+    if (user.role === "VENDOR") {
+        if (image) {
+            payload.profilePhoto = image.path;
+        }
+        const result = yield prisma_1.default.vendor.update({
+            where: {
+                email: user.email,
+            },
+            data: payload,
+        });
+        return result;
+    }
+    if (user.role === "ADMIN") {
+        if (image) {
+            payload.profilePhoto = image.path;
+        }
+        const result = yield prisma_1.default.admin.update({
+            where: {
+                email: user.email,
+            },
+            data: payload,
+        });
+        return result;
+    }
+});
+// subscription for first order
+const subscriberUser = (email) => __awaiter(void 0, void 0, void 0, function* () {
+    // check if the user already  subscribed
+    // const isSubscribed = await prisma.
+});
+// delete user
+// deletevendor reviews
+const deleteUserFromDB = (userId) => __awaiter(void 0, void 0, void 0, function* () {
+    // check if user exists
+    const isUserExists = yield prisma_1.default.user.findUnique({
         where: {
-            paymentStatus: "COMPLETED",
+            id: userId,
         },
     });
-    const shops = yield prisma_1.default.shop.count();
-    const category = yield prisma_1.default.category.count();
-    const result = {
-        products,
-        orders,
-        payments,
-        shops,
-        category,
-    };
-    return result;
+    if (!isUserExists) {
+        throw new ApiError_1.default(404, "User already deleted.");
+    }
+    yield prisma_1.default.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
+        if (isUserExists.role === "CUSTOMER") {
+            console.log("is user exists", isUserExists);
+            // delete customer
+            yield tx.customer.update({
+                where: {
+                    userId: isUserExists.id,
+                    isDeleted: false,
+                },
+                data: {
+                    isDeleted: true,
+                },
+            });
+            const result = yield tx.user.update({
+                where: {
+                    id: isUserExists.id,
+                    isDeleted: false,
+                },
+                data: {
+                    isDeleted: true,
+                },
+                omit: {
+                    password: true,
+                },
+            });
+            return result;
+        }
+        // delete vendor
+        if (isUserExists.role === "VENDOR") {
+            // delete customer
+            yield tx.vendor.update({
+                where: {
+                    userId: isUserExists.id,
+                    isDeleted: false,
+                },
+                data: {
+                    isDeleted: true,
+                },
+            });
+            const result = yield tx.user.update({
+                where: {
+                    id: isUserExists.id,
+                    isDeleted: false,
+                },
+                data: {
+                    isDeleted: true,
+                },
+                omit: {
+                    password: true,
+                },
+            });
+            return result;
+        }
+    }));
 });
 // vendor stats
-const getVendorStats = (vendorId) => __awaiter(void 0, void 0, void 0, function* () {
+const getVendorStats = (userId) => __awaiter(void 0, void 0, void 0, function* () {
+    const isVendorExists = yield prisma_1.default.vendor.findFirstOrThrow({
+        where: {
+            userId,
+        },
+    });
     // Fetch vendor-specific counts
     const [orderCount, completedPaymentsCount, followerCount, productCount] = yield Promise.all([
         // Total orders for this vendor's shop
         prisma_1.default.order.count({
             where: {
                 shop: {
-                    ownerId: vendorId,
+                    vendorId: isVendorExists.id,
                 },
             },
         }),
@@ -137,7 +305,7 @@ const getVendorStats = (vendorId) => __awaiter(void 0, void 0, void 0, function*
         prisma_1.default.order.count({
             where: {
                 shop: {
-                    ownerId: vendorId,
+                    vendorId: isVendorExists.id,
                 },
                 paymentStatus: "COMPLETED",
             },
@@ -146,7 +314,7 @@ const getVendorStats = (vendorId) => __awaiter(void 0, void 0, void 0, function*
         prisma_1.default.followingShop.count({
             where: {
                 shop: {
-                    ownerId: vendorId,
+                    vendorId: isVendorExists.id,
                 },
             },
         }),
@@ -154,12 +322,11 @@ const getVendorStats = (vendorId) => __awaiter(void 0, void 0, void 0, function*
         prisma_1.default.product.count({
             where: {
                 shop: {
-                    ownerId: vendorId,
+                    vendorId: isVendorExists.id,
                 },
             },
         }),
     ]);
-    // Return the counts
     return {
         totalOrders: orderCount,
         totalCompletedPayments: completedPaymentsCount,
@@ -188,7 +355,7 @@ const getUserStats = (customerEmail) => __awaiter(void 0, void 0, void 0, functi
         // Total reviews written by the user (customerEmail)
         prisma_1.default.review.count({
             where: {
-                user: {
+                customer: {
                     email: customerEmail,
                 },
             },
@@ -212,32 +379,34 @@ const getUserStats = (customerEmail) => __awaiter(void 0, void 0, void 0, functi
         totalCartItems: cartItemsCount,
     };
 });
-const updateMyProfile = (user, image) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("from backend user", user);
-    console.log("from backend image", image);
-    const userInfo = yield prisma_1.default.user.findUniqueOrThrow({
+// admin stats
+const getAdminStats = () => __awaiter(void 0, void 0, void 0, function* () {
+    const products = yield prisma_1.default.product.count();
+    const orders = yield prisma_1.default.orderItem.count();
+    const payments = yield prisma_1.default.order.count({
         where: {
-            email: user.email,
-            status: client_1.UserStatus.ACTIVE,
+            paymentStatus: "COMPLETED",
         },
     });
-    if (image) {
-        user.profilePhoto = image.path;
-    }
-    const result = yield prisma_1.default.user.update({
-        where: {
-            email: userInfo.email,
-        },
-        data: user,
-    });
+    const shops = yield prisma_1.default.shop.count();
+    const category = yield prisma_1.default.category.count();
+    const result = {
+        products,
+        orders,
+        payments,
+        shops,
+        category,
+    };
     return result;
 });
 exports.UserService = {
     getAllUsersFromDB,
-    createUserIntoDB,
+    createCustomerIntoDB,
+    createVendorIntoDB,
     getSingleUserFromDB,
     updateMyProfile,
-    getAdminStats,
+    deleteUserFromDB,
     getVendorStats,
     getUserStats,
+    getAdminStats,
 };

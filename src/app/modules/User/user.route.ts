@@ -24,7 +24,12 @@ router.get(
 router.get("/admin-stats", auth(UserRole.ADMIN), UserController.getAdminStats);
 
 router.post("/customer", UserController.createCustomer);
-router.post("/vendor", UserController.createVendor);
+router.post(
+  "/vendor",
+  multerUpload.single("shopImage"),
+  parseBody,
+  UserController.createVendor
+);
 
 router.put(
   "/",

@@ -46,7 +46,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthServices = void 0;
-const client_1 = require("@prisma/client");
 const bcrypt = __importStar(require("bcrypt"));
 const config_1 = __importDefault(require("../../../config"));
 const ApiError_1 = __importDefault(require("../../errors/ApiError"));
@@ -56,11 +55,8 @@ const loginUser = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const userData = yield prisma_1.default.user.findUniqueOrThrow({
         where: {
             email: payload.email,
-            status: client_1.UserStatus.ACTIVE,
         },
     });
-    console.log("payload", payload.password);
-    console.log("user", userData.password);
     const isCorrectPassword = yield bcrypt.compare(payload.password, userData.password);
     console.log(isCorrectPassword);
     if (!isCorrectPassword) {
@@ -71,14 +67,8 @@ const loginUser = (payload) => __awaiter(void 0, void 0, void 0, function* () {
         email: userData.email,
         role: userData.role,
     }, config_1.default.jwt.jwt_secret, config_1.default.jwt.expires_in);
-    const refreshToken = jwtHelpers_1.jwtHelpers.generateToken({
-        userId: userData.id,
-        email: userData.email,
-        role: userData.role,
-    }, config_1.default.jwt.refresh_token_secret, config_1.default.jwt.refresh_token_expires_in);
     return {
         accessToken,
-        refreshToken,
     };
 });
 const refreshToken = (token) => __awaiter(void 0, void 0, void 0, function* () {
@@ -92,7 +82,6 @@ const refreshToken = (token) => __awaiter(void 0, void 0, void 0, function* () {
     const userData = yield prisma_1.default.user.findUniqueOrThrow({
         where: {
             email: decodedData.email,
-            status: client_1.UserStatus.ACTIVE,
         },
     });
     const accessToken = jwtHelpers_1.jwtHelpers.generateToken({
@@ -107,7 +96,6 @@ const changePassword = (user, payload) => __awaiter(void 0, void 0, void 0, func
     const userData = yield prisma_1.default.user.findUniqueOrThrow({
         where: {
             email: user.email,
-            status: client_1.UserStatus.ACTIVE,
         },
     });
     const isCorrectPassword = yield bcrypt.compare(payload.oldPassword, userData.password);
@@ -127,44 +115,11 @@ const changePassword = (user, payload) => __awaiter(void 0, void 0, void 0, func
         message: "Password changed successfully!",
     };
 });
-// const forgotPassword = async (payload: { email: string }) => {
-//   const userData = await prisma.user.findUniqueOrThrow({
-//     where: {
-//       email: payload.email,
-//       status: UserStatus.ACTIVE,
-//     },
-//   });
-//   const resetPassToken = jwtHelpers.generateToken(
-//     { email: userData.email, role: userData.role },
-//     config.jwt.reset_pass_secret as Secret,
-//     config.jwt.reset_pass_token_expires_in as string
-//   );
-//   //console.log(resetPassToken)
-//   const resetPassLink =
-//     config.reset_pass_link + `?userId=${userData.id}&token=${resetPassToken}`;
-//   await emailSender(
-//     userData.email,
-//     `
-//         <div>
-//             <p>Dear User,</p>
-//             <p>Your password reset link
-//                 <a href=${resetPassLink}>
-//                     <button>
-//                         Reset Password
-//                     </button>
-//                 </a>
-//             </p>
-//         </div>
-//         `
-//   );
-//   //console.log(resetPassLink)
-// };
 const resetPassword = (token, payload) => __awaiter(void 0, void 0, void 0, function* () {
     console.log({ token, payload });
     const userData = yield prisma_1.default.user.findUniqueOrThrow({
         where: {
             id: payload.id,
-            status: client_1.UserStatus.ACTIVE,
         },
     });
     const isValidToken = jwtHelpers_1.jwtHelpers.verifyToken(token, config_1.default.jwt.reset_pass_secret);

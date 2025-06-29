@@ -11,6 +11,7 @@ export const addToCart = async (
   }
 ) => {
   const { shopId, productId, price, quantity = 1 } = payload;
+  console.log({ shopId, productId, price });
 
   // check is the customer exists
   const isCustomerExists = await prisma.customer.findFirstOrThrow({
@@ -19,12 +20,28 @@ export const addToCart = async (
       isDeleted: false,
     },
   });
+  // check is the shop exists
+  await prisma.shop.findFirstOrThrow({
+    where: {
+      id: shopId,
+      isDeleted: false,
+    },
+  });
+  // check is the product exists
+  await prisma.product.findFirstOrThrow({
+    where: {
+      id: productId,
+      isDeleted: false,
+    },
+  });
 
   // Check if the cart already exists for the customer
-  let cart = await prisma.cart.findUnique({
-    where: { customerId: isCustomerExists.id },
+  let cart = await prisma.cart.findFirst({
+    where: { customerId: isCustomerExists.id, isDeleted: false },
     include: { cartItem: true },
   });
+
+  console.log({ cart });
 
   if (!cart) {
     // Create a new cart if it doesn't exist
@@ -99,8 +116,16 @@ export const clearCart = async (customerId: string) => {
     throw new Error("Cart not found");
   }
 
-  // Delete all items from the cart
-  await prisma.cartItem.deleteMany({ where: { cartId: cart.id } });
+  await prisma.$transaction(async (tx) => {
+    // Delete all items from the cart
+    await tx.cartItem.deleteMany({
+      where: { cartId: cart.id, isDeleted: false },
+    });
+    const result = await tx.cart.delete({
+      where: { customerId, isDeleted: false },
+    });
+    return result;
+  });
 
   // Optionally, you can also delete the cart itself if needed
   // await prisma.cart.delete({ where: { customerId } });
@@ -110,19 +135,45 @@ export const clearCart = async (customerId: string) => {
 
 // Remove a specific cart item
 export const removeCartItem = async (cartItemId: string) => {
-  // Find the cart item by its ID
-  const cartItem = await prisma.cartItem.findUnique({
-    where: { id: cartItemId },
+  return await prisma.$transaction(async (tx) => {
+    // 1. Find the cart item
+    const cartItem = await tx.cartItem.findFirst({
+      where: { id: cartItemId, isDeleted: false },
+    });
+
+    if (!cartItem) {
+      throw new ApiError(404, "Cart item not found");
+    }
+
+    const cartId = cartItem.cartId;
+
+    // 2. Soft delete the cart item
+    await tx.cartItem.delete({
+      where: { id: cartItemId, isDeleted: false },
+    });
+
+    // 3. Count remaining active items in the cart
+    const remainingItemCount = await tx.cartItem.count({
+      where: {
+        cartId,
+        isDeleted: false,
+      },
+    });
+
+    console.log({ remainingItemCount });
+    // 4. If none left, soft-delete the cart too
+    if (remainingItemCount === 0) {
+      await tx.cart.delete({
+        where: { id: cartId, isDeleted: false },
+      });
+
+      return {
+        message: "Cart item and its parent cart removed successfully",
+      };
+    }
+
+    return { message: "Cart item removed successfully" };
   });
-
-  if (!cartItem) {
-    throw new ApiError(404, "Cart item not found");
-  }
-
-  // Remove the cart item
-  await prisma.cartItem.delete({ where: { id: cartItemId } });
-
-  return { message: "Cart item removed successfully" };
 };
 
 // Get user's specific cart with total quantity and total price
@@ -144,9 +195,12 @@ const getUserCart = async (userId: string) => {
   }
   // Fetch the cart along with its items
   const cart = await prisma.cart.findUnique({
-    where: { customerId: isCustomerExists.id },
+    where: { customerId: isCustomerExists.id, isDeleted: false },
     include: {
       cartItem: {
+        where: {
+          isDeleted: false,
+        },
         include: {
           product: true, // Include product details if needed
         },

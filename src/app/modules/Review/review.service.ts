@@ -4,39 +4,6 @@ import prisma from "../../../sharred/prisma";
 import { TImageFile, TImageFiles } from "../../interfaces/file";
 import ApiError from "../../errors/ApiError";
 
-// / get all product specific reviews from db
-// const getProductSpecificReviews = async (productId: string) => {
-//   const result = await prisma.product.findUniqueOrThrow({
-//     where: {
-//       id: productId,
-//       isDeleted: false,
-//     },
-//     include: {
-//       review: true,
-//     },
-//   });
-
-//   const reviews = result.review;
-//   const reviewCounts = await prisma.review.groupBy({
-//     by: ["rating"],
-//     where: {
-//       productId: productId,
-//       isDeleted: false,
-//     },
-//     _count: true,
-//   });
-
-//   const totalReviews = reviews.length;
-//   const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
-//   const averageRating = totalReviews > 0 ? totalRating / totalReviews : 0;
-
-//   return {
-//     reviews,
-//     reviewCounts,
-//     averageRating,
-//   };
-// };
-
 // get all reviews
 const getAllReviewsFromDB = async (paginationOption: any) => {
   const { limit, page, skip, sortBy, sortOrder } =
@@ -95,18 +62,6 @@ const getProductSpecificReviews = async (
 
   const andCondition: Prisma.ReviewWhereInput[] = [];
 
-  // Search functionality
-  // if (searchTerm) {
-  //   andCondition.push({
-  //     OR: productSearchAbleFields.map((field) => ({
-  //       [field]: {
-  //         contains: searchTerm,
-  //         mode: "insensitive",
-  //       },
-  //     })),
-  //   });
-  // }
-
   // Filter by specific fields
   if (productId) {
     andCondition.push({
@@ -117,18 +72,6 @@ const getProductSpecificReviews = async (
   if (rating) {
     andCondition.push({ rating: Number(rating) });
   }
-
-  console.log("query review", andCondition);
-  // // Add any additional filters from fieldParams
-  // if (Object.keys(otherFilters)?.length > 0) {
-  //   andCondition.push({
-  //     AND: Object.keys(otherFilters).map((key) => ({
-  //       [key]: {
-  //         equals: otherFilters[key],
-  //       },
-  //     })),
-  //   });
-  // }
 
   // Combine all conditions
   const whereCondition: Prisma.ReviewWhereInput = {
@@ -160,6 +103,10 @@ const getProductSpecificReviews = async (
   });
 
   const aggregateRating = await prisma.review.aggregate({
+    where: {
+      productId: productId,
+      isDeleted: false,
+    },
     _avg: {
       rating: true,
     },
@@ -173,7 +120,6 @@ const getProductSpecificReviews = async (
     data: { result, aggregateRating },
   };
 };
-
 const getAllVendorProductsReviews = async (
   paginationOption: any,
   email: string
@@ -213,7 +159,6 @@ const getAllVendorProductsReviews = async (
           createdAt: true,
           updatedAt: true,
           shopId: true,
-          brandId: true,
           categoryId: true,
         },
       },
@@ -443,33 +388,6 @@ const deleteUserReviewFromDB = async (id: string) => {
 
   return result;
 };
-
-// delete user reviews
-// const deleteUserReviewFromDB = async (id: string) => {
-//   // is review exists
-//   const isReviewExists = await prisma.review.findFirst({
-//     where: {
-//       isDeleted: false,
-//       id,
-//     },
-//   });
-
-//   if (!isReviewExists) {
-//     throw new ApiError(404, "Review not found!");
-//   }
-
-//   const result = await prisma.review.update({
-//     where: {
-//       id,
-//       isDeleted: false,
-//     },
-//     data: {
-//       isDeleted: true,
-//     },
-//   });
-
-//   return result;
-// };
 
 export const ReviewService = {
   getAllReviewsFromDB,

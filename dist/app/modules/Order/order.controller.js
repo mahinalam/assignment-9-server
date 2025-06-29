@@ -16,8 +16,11 @@ exports.OrderController = void 0;
 const catchAsync_1 = __importDefault(require("../../../sharred/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../../sharred/sendResponse"));
 const order_service_1 = require("./order.service");
+const pick_1 = __importDefault(require("../../../sharred/pick"));
 const createOrder = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield order_service_1.OrderService.createOrderIntoDB(req.body);
+    const { userId } = req.user;
+    console.log("order", req.body);
+    const result = yield order_service_1.OrderService.createOrderIntoDB(userId, req.body);
     (0, sendResponse_1.default)(res, {
         statusCode: 200,
         success: true,
@@ -26,8 +29,14 @@ const createOrder = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, vo
     });
 }));
 const getVendorOrderHistory = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { userId } = req.user;
-    const orders = yield order_service_1.OrderService.getVendorOrderHistory(userId);
+    const paginationOption = (0, pick_1.default)(req.query, [
+        "limit",
+        "page",
+        "sortBy",
+        "sortOrder",
+    ]);
+    const { email } = req.user;
+    const orders = yield order_service_1.OrderService.getVendorOrderHistory(paginationOption, email);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: 200,
@@ -37,7 +46,13 @@ const getVendorOrderHistory = (0, catchAsync_1.default)((req, res) => __awaiter(
 }));
 const getUsersOrderHistory = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email } = req.user;
-    const orders = yield order_service_1.OrderService.getUsersOrderHistory(email);
+    const paginationOption = (0, pick_1.default)(req.query, [
+        "limit",
+        "page",
+        "sortBy",
+        "sortOrder",
+    ]);
+    const orders = yield order_service_1.OrderService.getUsersOrderHistory(email, paginationOption);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: 200,
@@ -46,7 +61,13 @@ const getUsersOrderHistory = (0, catchAsync_1.default)((req, res) => __awaiter(v
     });
 }));
 const getAllOrderHistory = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const orders = yield order_service_1.OrderService.getAllOrderHistory();
+    const paginationOption = (0, pick_1.default)(req.query, [
+        "limit",
+        "page",
+        "sortBy",
+        "sortOrder",
+    ]);
+    const orders = yield order_service_1.OrderService.getAllOrderHistory(paginationOption);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: 200,
@@ -74,6 +95,18 @@ const updateOrderStatus = (0, catchAsync_1.default)((req, res) => __awaiter(void
         data: orders,
     });
 }));
+// delete order
+const deleteOrder = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    const { email } = req.user;
+    const result = yield order_service_1.OrderService.deleteOrderFromDB(email, id);
+    (0, sendResponse_1.default)(res, {
+        statusCode: 200,
+        success: true,
+        message: "Order deleted successfuly!",
+        data: result,
+    });
+}));
 exports.OrderController = {
     createOrder,
     getVendorOrderHistory,
@@ -81,4 +114,5 @@ exports.OrderController = {
     getAllOrderHistory,
     getUserUnconfirmOrder,
     updateOrderStatus,
+    deleteOrder,
 };

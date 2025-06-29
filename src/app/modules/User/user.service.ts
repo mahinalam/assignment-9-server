@@ -35,7 +35,7 @@ const createCustomerIntoDB = async (userInfo: any, customerInfo: any) => {
       email: userData.email,
     };
 
-    const customer = await tx.customer.create({
+    await tx.customer.create({
       data: customerData,
     });
 
@@ -58,7 +58,12 @@ const createCustomerIntoDB = async (userInfo: any, customerInfo: any) => {
 };
 
 // create vendor
-const createVendorIntoDB = async (userInfo: any, vendorInfo: any, shopInfo) => {
+const createVendorIntoDB = async (
+  userInfo: any,
+  vendorInfo: any,
+  shopInfo: any,
+  shopImage: any
+) => {
   // is vendor exists
   const isVendorExists = await prisma.user.findFirst({
     where: {
@@ -90,12 +95,25 @@ const createVendorIntoDB = async (userInfo: any, vendorInfo: any, shopInfo) => {
     });
     if (shopInfo) {
       shopInfo.vendorId = vendor.id;
+      shopInfo.logo = shopImage.path;
 
-      const shop = await tx.shop.create({
+      await tx.shop.create({
         data: shopInfo,
       });
     }
-    return vendor;
+    const accessToken = jwtHelpers.generateToken(
+      {
+        userId: userData.id,
+        email: userData.email,
+        role: userData.role,
+      },
+      config.jwt.jwt_secret as Secret,
+      config.jwt.expires_in as string
+    );
+
+    return {
+      accessToken,
+    };
   });
   return result;
 };

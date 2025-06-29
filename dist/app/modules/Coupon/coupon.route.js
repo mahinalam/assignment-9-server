@@ -11,5 +11,6 @@ const client_1 = require("@prisma/client");
 const router = express_1.default.Router();
 router.get("/", coupon_controller_1.CouponController.allCoupon);
 router.post("/", (0, auth_1.default)(client_1.UserRole.ADMIN), coupon_controller_1.CouponController.createCoupon);
-router.post("/code", (0, auth_1.default)(client_1.UserRole.USER), coupon_controller_1.CouponController.applyCouponCode);
+router.post("/code", (0, auth_1.default)(client_1.UserRole.CUSTOMER), coupon_controller_1.CouponController.applyCouponCode);
+router.delete("/:id", (0, auth_1.default)(client_1.UserRole.ADMIN), coupon_controller_1.CouponController.deleteCoupon);
 exports.CouponRoute = router;

@@ -12,9 +12,12 @@ const product_route_1 = require("../modules/Product/product.route");
 const review_route_1 = require("../modules/Review/review.route");
 const order_route_1 = require("../modules/Order/order.route");
 const payment_route_1 = require("../modules/Payment/payment.route");
-const brand_route_1 = require("../modules/Brand/brand.route");
 const coupon_route_1 = require("../modules/Coupon/coupon.route");
 const cart_route_1 = require("../modules/Cart/cart.route");
+const wishlist_route_1 = require("../modules/Wishlist/wishlist.route");
+const contact_route_1 = require("../modules/Contact/contact.route");
+const compare_route_1 = require("../modules/Compare/compare.route");
+const newsLetter_route_1 = require("../modules/NewsLetter/newsLetter.route");
 const router = express_1.default.Router();
 const moduleRoutes = [
     {
@@ -50,16 +53,28 @@ const moduleRoutes = [
         route: payment_route_1.PaymentRoute,
     },
     {
-        path: "/brand",
-        route: brand_route_1.BrandRoute,
-    },
-    {
         path: "/coupon",
         route: coupon_route_1.CouponRoute,
     },
     {
         path: "/cart",
         route: cart_route_1.CartRoute,
+    },
+    {
+        path: "/wishlist",
+        route: wishlist_route_1.WishlistRoute,
+    },
+    {
+        path: "/contact",
+        route: contact_route_1.ContactRoute,
+    },
+    {
+        path: "/compare",
+        route: compare_route_1.CompareRoute,
+    },
+    {
+        path: "/news-letter",
+        route: newsLetter_route_1.NewsLetterRoute,
     },
 ];
 moduleRoutes.forEach((route) => router.use(route.path, route.route));

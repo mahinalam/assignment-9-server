@@ -12,35 +12,30 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.OrderItemController = void 0;
+exports.NewsLetterController = void 0;
 const catchAsync_1 = __importDefault(require("../../../sharred/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../../sharred/sendResponse"));
-const orderItem_service_1 = require("./orderItem.service");
-const createOrderItem = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield orderItem_service_1.OrderItemService.createOrderItemIntoDB(req.body);
+const newsLetter_service_1 = require("./newsLetter.service");
+const getNewsLetter = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { email } = req.user;
+    const result = yield newsLetter_service_1.NewsLetterService.getNewsLetter(email);
     (0, sendResponse_1.default)(res, {
         statusCode: 200,
         success: true,
-        message: "Order Item created successfuly!",
+        message: "News letter retrieved  successfuly!",
         data: result,
     });
 }));
-const getAllOrderItem = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const orderItems = yield orderItem_service_1.OrderItemService.getOrderItemsFromDB();
+const createNewsLetter = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield newsLetter_service_1.NewsLetterService.createNewsLetter(req.body.email);
     (0, sendResponse_1.default)(res, {
-        success: true,
         statusCode: 200,
-        message: "Order Items retrieved successfully",
-        data: orderItems,
+        success: true,
+        message: "News letter created successfuly!",
+        data: result,
     });
 }));
-exports.OrderItemController = {
-    createOrderItem,
-    getAllOrderItem,
-    //   getAllCategories,
-    //   createCustomer,
-    // getAllFromDB,
-    // changeProfileStatus,
-    // getMyProfile,
-    // updateMyProfie
+exports.NewsLetterController = {
+    createNewsLetter,
+    getNewsLetter,
 };

@@ -12,114 +12,244 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.OrderService = void 0;
+exports.OrderService = exports.createOrderIntoDB = void 0;
 const prisma_1 = __importDefault(require("../../../sharred/prisma"));
 const payment_utils_1 = require("../Payment/payment.utils");
-const createOrderIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const { customerShippingAddress, orderItems, shopId, customerName, customerEmail, customerPhone, } = payload;
-    console.log("order items", orderItems);
-    const totalPrice = orderItems === null || orderItems === void 0 ? void 0 : orderItems.reduce((total, item) => {
+const paginationHelper_1 = require("../../../helpers/paginationHelper");
+const ApiError_1 = __importDefault(require("../../errors/ApiError"));
+const createOrderIntoDB = (userId, payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const { shippingAddress, orderItems, shopId, customerName, customerEmail, phoneNumber, } = payload;
+    // find subscription throw email
+    const isSubscribed = yield prisma_1.default.newsLetter.findFirst({
+        where: {
+            email: customerEmail,
+            isDeleted: false,
+        },
+    });
+    let totalPrice = orderItems.reduce((total, item) => {
         return total + Number(item.price) * Number(item.quantity);
-    }, 0);
-    // Use a transaction to ensure atomicity
-    const result = yield prisma_1.default.$transaction((prisma) => __awaiter(void 0, void 0, void 0, function* () {
-        // Create order
-        const timestamp = Date.now();
-        const randomStr = Math.random().toString(36).substring(2, 10);
-        const transactionId = `txn_${timestamp}_${randomStr}`;
-        const orderInfo = yield prisma.order.create({
+    }, 100);
+    if (isSubscribed) {
+        totalPrice = totalPrice * 0.8;
+    }
+    const transactionId = `txn_${Date.now()}_${Math.random()
+        .toString(36)
+        .substring(2, 10)}`;
+    // cretae order
+    const result = yield prisma_1.default.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
+        const order = yield tx.order.create({
             data: {
                 totalPrice,
-                customerShippingAddress,
                 transactionId,
                 shopId,
                 customerName,
                 customerEmail,
-                customerPhone,
+                phoneNumber,
+                shippingAddress,
             },
         });
-        // Create order items
-        const allOrderItems = orderItems.map((item) => ({
-            orderId: orderInfo.id,
+        // create order items
+        const itemsToCreate = orderItems.map((item) => ({
+            orderId: order.id,
             productId: item.productId,
-            quantity: Number(item.quantity),
-            price: Number(item.price),
+            quantity: item.quantity,
+            price: item.price,
         }));
-        yield prisma.orderItem.createMany({
-            data: allOrderItems,
+        yield tx.orderItem.createMany({
+            data: itemsToCreate,
         });
-        // const paymentData = {
-        //   transactionId,
-        //   totalPrice,
-        //   customerName: orderInfo.customerName,
-        //   customerEmail: orderInfo.customerEmail,
-        //   customerPhone: orderInfo.customerPhone,
-        //   customerAddress: orderInfo.customerShippingAddress,
-        // };
-        // // console.log("paymentData", paymentData);
-        // const paymentSession = await initiatePayment(paymentData);
-        // // console.log("paymentdata", paymentData);
-        // return paymentSession;
+        if (isSubscribed) {
+            yield tx.newsLetter.update({
+                where: {
+                    email: customerEmail,
+                    isDeleted: false,
+                },
+                data: {
+                    isDeleted: true,
+                },
+            });
+        }
+        const isCustomerExists = yield prisma_1.default.customer.findFirst({
+            where: {
+                userId,
+                isDeleted: false,
+            },
+        });
+        const existingCart = yield prisma_1.default.cart.findFirst({
+            where: {
+                customerId: isCustomerExists.id,
+            },
+            include: {
+                cartItem: true,
+            },
+        });
+        console.log("cartItem"), existingCart;
+        for (const item of existingCart.cartItem) {
+            yield tx.cartItem.deleteMany({
+                where: { cartId: existingCart.id },
+            });
+        }
+        // Step 2.3: Clear the user's cart and cart items after confirming the order
+        yield tx.cart.delete({
+            where: { id: existingCart.id },
+        });
+        const paymentData = {
+            transactionId,
+            totalPrice,
+            customerName,
+            customerEmail,
+            customerPhone: phoneNumber,
+            customerAddress: shippingAddress,
+        };
+        const paymentSession = yield (0, payment_utils_1.initiatePayment)(paymentData);
+        return paymentSession;
     }));
     return result;
 });
-const getVendorOrderHistory = (vendorId) => __awaiter(void 0, void 0, void 0, function* () {
-    const orders = yield prisma_1.default.order.findMany({
+exports.createOrderIntoDB = createOrderIntoDB;
+const getVendorOrderHistory = (paginationOption, email) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const { limit, page, skip, sortBy, sortOrder } = paginationHelper_1.paginationHelper.calculatePagination(paginationOption);
+    // check is vendor exists
+    const isVendorExists = yield prisma_1.default.vendor.findUnique({
         where: {
+            email,
+            isDeleted: false,
+        },
+        select: {
             shop: {
-                ownerId: vendorId,
+                select: {
+                    id: true,
+                    order: {
+                        select: {
+                            customerEmail: true,
+                            customerName: true,
+                            id: true,
+                            totalPrice: true,
+                            createdAt: true,
+                            orderItem: {
+                                include: {
+                                    product: {
+                                        select: {
+                                            id: true,
+                                            images: true,
+                                            name: true,
+                                            price: true,
+                                        },
+                                    },
+                                },
+                            },
+                            paymentStatus: true,
+                            phoneNumber: true,
+                            profilePhoto: true,
+                            transactionId: true,
+                            status: true,
+                        },
+                        skip: skip,
+                        take: limit,
+                        orderBy: {
+                            [sortBy || "createdAt"]: sortOrder || "desc",
+                        },
+                    },
+                },
             },
         },
-        include: {
-            orderItems: true,
-            shop: true,
+    });
+    const total = yield prisma_1.default.order.count({
+        where: {
+            shopId: (_a = isVendorExists === null || isVendorExists === void 0 ? void 0 : isVendorExists.shop) === null || _a === void 0 ? void 0 : _a.id,
         },
     });
-    return orders;
+    return {
+        meta: {
+            page,
+            limit,
+            total,
+        },
+        data: isVendorExists,
+    };
 });
-const getAllOrderHistory = () => __awaiter(void 0, void 0, void 0, function* () {
+const getAllOrderHistory = (paginationOption) => __awaiter(void 0, void 0, void 0, function* () {
+    const { limit, page, skip, sortBy, sortOrder } = paginationHelper_1.paginationHelper.calculatePagination(paginationOption);
     const orders = yield prisma_1.default.order.findMany({
         where: {
             isDeleted: false,
         },
+        skip: skip,
+        take: limit,
+        orderBy: {
+            [sortBy || "createdAt"]: sortOrder || "desc",
+        },
         include: {
-            orderItems: true,
+            orderItem: true,
             shop: true,
         },
     });
-    return orders;
+    const total = yield prisma_1.default.order.count();
+    return {
+        meta: {
+            page,
+            limit,
+            total,
+        },
+        data: orders,
+    };
 });
-const getUsersOrderHistory = (email) => __awaiter(void 0, void 0, void 0, function* () {
+const getUsersOrderHistory = (email, paginationOption) => __awaiter(void 0, void 0, void 0, function* () {
+    const { limit, page, skip, sortBy, sortOrder } = paginationHelper_1.paginationHelper.calculatePagination(paginationOption);
     const orders = yield prisma_1.default.order.findMany({
         where: {
             customerEmail: email,
+            isDeleted: false,
         },
         include: {
-            orderItems: {
+            orderItem: {
+                where: {
+                    isDeleted: false,
+                },
                 include: {
                     product: true,
                 },
             },
             payment: true,
         },
+        skip: skip,
+        take: limit,
+        orderBy: {
+            [sortBy || "createdAt"]: sortOrder || "desc",
+        },
     });
-    return orders;
-});
-const getUserUnConfirmOrder = (email) => __awaiter(void 0, void 0, void 0, function* () {
-    const allCarts = yield prisma_1.default.order.findFirst({
+    const total = yield prisma_1.default.order.count({
         where: {
             customerEmail: email,
-            orderStatus: "PENDING",
-        },
-        include: {
-            orderItems: {
-                include: {
-                    product: true,
-                },
-            },
         },
     });
-    return allCarts;
+    console.log("orders", orders);
+    return {
+        meta: {
+            page,
+            limit,
+            total,
+        },
+        data: orders,
+    };
+});
+const getUserUnConfirmOrder = (email) => __awaiter(void 0, void 0, void 0, function* () {
+    const isCustomerExists = yield prisma_1.default.customer.findFirst({
+        where: {
+            email,
+        },
+    });
+    const allOrders = yield prisma_1.default.cart.findFirst({
+        where: {
+            customerId: isCustomerExists.id,
+            isDeleted: false,
+        },
+        include: {
+            cartItem: true,
+        },
+    });
+    return allOrders;
 });
 // const updateOrder = async (payload: {
 //   transactionId: string;
@@ -175,7 +305,7 @@ const updateOrder = (userId, payload) => __awaiter(void 0, void 0, void 0, funct
     const idOrderExists = yield prisma_1.default.order.findUniqueOrThrow({
         where: { transactionId },
     });
-    if (idOrderExists.orderStatus !== "PENDING") {
+    if (idOrderExists.status !== "PENDING") {
         throw new Error("Order status must be PENDING to confirm.");
     }
     // Step 2: Update order status and handle stock decrement in a transaction
@@ -184,12 +314,12 @@ const updateOrder = (userId, payload) => __awaiter(void 0, void 0, void 0, funct
         const order = yield tx.order.update({
             where: { transactionId },
             data: {
-                orderStatus: "CONFIRMED",
+                status: "CONFIRMED",
                 totalPrice, // Update totalPrice here if needed
             },
-            include: { orderItems: true },
+            include: { orderItem: true },
         });
-        for (const item of order.orderItems) {
+        for (const item of order.orderItem) {
             yield tx.product.update({
                 where: { id: item.productId },
                 data: { stock: { decrement: item.quantity } },
@@ -201,10 +331,10 @@ const updateOrder = (userId, payload) => __awaiter(void 0, void 0, void 0, funct
                 customerId: userId,
             },
             include: {
-                cartItems: true,
+                cartItem: true,
             },
         });
-        for (const item of existingCart.cartItems) {
+        for (const item of existingCart.cartItem) {
             yield tx.cartItem.deleteMany({
                 where: { cartId: existingCart.id },
             });
@@ -221,17 +351,62 @@ const updateOrder = (userId, payload) => __awaiter(void 0, void 0, void 0, funct
         totalPrice,
         customerName: idOrderExists.customerName,
         customerEmail: idOrderExists.customerEmail,
-        customerPhone: idOrderExists.customerPhone,
-        customerAddress: idOrderExists.customerShippingAddress,
+        customerPhone: idOrderExists.phoneNumber,
+        customerAddress: idOrderExists.shippingAddress,
     };
     const paymentSession = yield (0, payment_utils_1.initiatePayment)(paymentData);
     return paymentSession;
 });
+// delete order
+const deleteOrderFromDB = (customerEmail, orderItemId) => __awaiter(void 0, void 0, void 0, function* () {
+    // check if order exists
+    const isOrderExists = yield prisma_1.default.order.findFirst({
+        where: {
+            customerEmail,
+            isDeleted: false,
+        },
+    });
+    if (!isOrderExists) {
+        throw new ApiError_1.default(404, "Order doesn't exists.");
+    }
+    // check is order item exists
+    const isOrderItemExists = yield prisma_1.default.orderItem.findFirst({
+        where: {
+            id: orderItemId,
+            isDeleted: false,
+        },
+    });
+    if (!isOrderItemExists) {
+        throw new ApiError_1.default(404, "Order Item doesn't exists.");
+    }
+    const result = yield prisma_1.default.orderItem.update({
+        where: {
+            id: isOrderItemExists.id,
+            isDeleted: false,
+        },
+        data: {
+            isDeleted: true,
+            order: {
+                update: {
+                    where: {
+                        id: isOrderExists.id,
+                        isDeleted: false,
+                    },
+                    data: {
+                        isDeleted: true,
+                    },
+                },
+            },
+        },
+    });
+    return result;
+});
 exports.OrderService = {
-    createOrderIntoDB,
+    createOrderIntoDB: exports.createOrderIntoDB,
     getVendorOrderHistory,
     getUsersOrderHistory,
     getAllOrderHistory,
     getUserUnConfirmOrder,
     updateOrder,
+    deleteOrderFromDB,
 };

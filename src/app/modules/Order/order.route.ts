@@ -30,10 +30,5 @@ router.get(
   OrderController.getUserUnconfirmOrder
 );
 router.delete("/:id", auth(UserRole.CUSTOMER), OrderController.deleteOrder);
-// router.put(
-//   "/update-order",
-//   auth(UserRole.CUSTOMER, UserRole.ADMIN, UserRole.ADMIN),
-//   OrderController.updateOrderStatus
-// );
 
 export const OrderRoute = router;

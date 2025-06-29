@@ -238,7 +238,7 @@ const getAllProductsFromDB = async (
 ) => {
   const { limit, page, skip, sortBy, sortOrder } =
     paginationHelper.calculatePagination(paginationOption);
-  const { searchTerm, priceMin, priceMax, rating, brandId, categoryId, stock } =
+  const { searchTerm, priceMin, priceMax, rating, categoryId, stock } =
     fieldParams;
   console.log("category", categoryId);
   const andCondition: Prisma.ProductWhereInput[] = [];
@@ -272,14 +272,6 @@ const getAllProductsFromDB = async (
       },
     });
   }
-  if (stock === "out_of_stock") {
-    andCondition.push({
-      stock: {
-        lte: 0,
-      },
-    });
-  }
-
   if (rating) {
     andCondition.push({
       review: {
@@ -380,8 +372,6 @@ const createProductIntoDB = async (payload: Product, images: TImageFiles) => {
 
 // update product
 const updateProductIntoDB = async (payload: Product, images: TImageFiles) => {
-  console.log("images", images);
-
   // Check if product exists
   await prisma.product.findFirstOrThrow({
     where: {
@@ -400,10 +390,21 @@ const updateProductIntoDB = async (payload: Product, images: TImageFiles) => {
 
   const updatedProductData: any = {
     ...payload,
-    price: Number(payload.price),
-    stock: Number(payload.stock),
-    discount: payload?.discount ? Number(payload.discount) : 0,
   };
+
+  // 🔁 Convert number-like fields safely
+  if (payload.price) {
+    console.log("hi");
+    updatedProductData.price = Number(payload.price);
+  }
+
+  if (payload.stock) {
+    updatedProductData.stock = Number(payload.stock);
+  }
+
+  if (payload.discount) {
+    updatedProductData.discount = Number(payload.discount);
+  }
 
   const productImages = images?.itemImages;
 

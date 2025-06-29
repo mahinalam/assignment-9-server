@@ -1,148 +1,8 @@
-import { Order, OrderItem } from "@prisma/client";
+import { OrderItem } from "@prisma/client";
 import prisma from "../../../sharred/prisma";
 import { initiatePayment } from "../Payment/payment.utils";
 import { paginationHelper } from "../../../helpers/paginationHelper";
 import ApiError from "../../errors/ApiError";
-
-// const createOrderIntoDB = async (payload: any) => {
-//   const {
-//     customerShippingAddress,
-//     orderItems,
-//     shopId,
-//     customerName,
-//     customerEmail,
-//     customerPhone,
-//   } = payload;
-//   console.log("order items", orderItems);
-//   const totalPrice: number = orderItems?.reduce((total: number, item: any) => {
-//     return total + Number(item.price) * Number(item.quantity);
-//   }, 0);
-
-//   // check is order exist
-//   const isOrderExists = await prisma.order.findFirst({
-//     where: {
-//       customerEmail: payload?.customerEmail,
-//     },
-//   });
-//   if (isOrderExists) {
-//     const allOrderItems = orderItems.map((item: any) => ({
-//       orderId: isOrderExists.id,
-//       productId: item.productId,
-//       quantity: Number(item.quantity),
-//       price: Number(item.price),
-//     }));
-
-//     return await prisma.orderItem.createMany({
-//       data: allOrderItems,
-//     });
-//   } else {
-//     const result = await prisma.$transaction(async (prisma) => {
-//       // Create order
-//       const timestamp = Date.now();
-//       const randomStr = Math.random().toString(36).substring(2, 10);
-//       const transactionId = `txn_${timestamp}_${randomStr}`;
-
-//       const orderInfo = await prisma.order.create({
-//         data: {
-//           totalPrice,
-//           customerShippingAddress,
-//           transactionId,
-//           shopId,
-//           customerName,
-//           customerEmail,
-//           customerPhone,
-//         },
-//       });
-
-//       // Create order items
-//       const allOrderItems = orderItems.map((item: any) => ({
-//         orderId: orderInfo.id,
-//         productId: item.productId,
-//         quantity: Number(item.quantity),
-//         price: Number(item.price),
-//       }));
-
-//       await prisma.orderItem.createMany({
-//         data: allOrderItems,
-//       });
-//     });
-//     return result;
-//   }
-
-//   // Use a transaction to ensure atomicity
-
-//   // return result;
-// };
-
-// export const createOrderIntoDB = async (payload: any) => {
-//   const {
-//     shippingAddress,
-//     orderItems,
-//     shopId,
-//     customerName,
-//     customerEmail,
-//     phoneNumber,
-//   } = payload;
-
-//   const totalPrice = orderItems.reduce((total: number, item: any) => {
-//     return total + item.price * item.quantity;
-//   }, 0);
-
-//   const existingOrder = await prisma.order.findFirst({
-//     where: {
-//       customerEmail,
-//     },
-//   });
-
-//   if (existingOrder) {
-//     const additionalItems = orderItems.map((item) => ({
-//       orderId: existingOrder.id,
-//       productId: item.productId,
-//       quantity: item.quantity,
-//       price: item.price,
-//     }));
-
-//     await prisma.orderItem.createMany({
-//       data: additionalItems,
-//     });
-
-//     // Just return the existing order
-//     return existingOrder;
-//   } else {
-//     const transactionId = `txn_${Date.now()}_${Math.random()
-//       .toString(36)
-//       .substring(2, 10)}`;
-
-//     const result = await prisma.$transaction(async (tx) => {
-//       const order = await tx.order.create({
-//         data: {
-//           totalPrice,
-//           transactionId,
-//           shopId,
-//           customerName,
-//           customerEmail,
-//           phoneNumber,
-//           shippingAddress,
-//         },
-//       });
-
-//       const itemsToCreate = orderItems.map((item) => ({
-//         orderId: order.id,
-//         productId: item.productId,
-//         quantity: item.quantity,
-//         price: item.price,
-//       }));
-
-//       await tx.orderItem.createMany({
-//         data: itemsToCreate,
-//       });
-
-//       return order;
-//     });
-
-//     return result;
-//   }
-// };
 
 export const createOrderIntoDB = async (userId: any, payload: any) => {
   const {
@@ -153,7 +13,6 @@ export const createOrderIntoDB = async (userId: any, payload: any) => {
     customerEmail,
     phoneNumber,
   } = payload;
-  console.log("from order", payload);
 
   // find subscription throw email
   const isSubscribed = await prisma.newsLetter.findFirst({
@@ -175,6 +34,7 @@ export const createOrderIntoDB = async (userId: any, payload: any) => {
     .toString(36)
     .substring(2, 10)}`;
 
+  // cretae order
   const result = await prisma.$transaction(async (tx) => {
     const order = await tx.order.create({
       data: {
@@ -188,6 +48,7 @@ export const createOrderIntoDB = async (userId: any, payload: any) => {
       },
     });
 
+    // create order items
     const itemsToCreate = orderItems.map((item: OrderItem) => ({
       orderId: order.id,
       productId: item.productId,
@@ -199,15 +60,17 @@ export const createOrderIntoDB = async (userId: any, payload: any) => {
       data: itemsToCreate,
     });
 
-    await tx.newsLetter.update({
-      where: {
-        email: customerEmail,
-        isDeleted: false,
-      },
-      data: {
-        isDeleted: true,
-      },
-    });
+    if (isSubscribed) {
+      await tx.newsLetter.update({
+        where: {
+          email: customerEmail,
+          isDeleted: false,
+        },
+        data: {
+          isDeleted: true,
+        },
+      });
+    }
 
     const isCustomerExists = await prisma.customer.findFirst({
       where: {
@@ -215,8 +78,6 @@ export const createOrderIntoDB = async (userId: any, payload: any) => {
         isDeleted: false,
       },
     });
-
-    console.log("is customer exist", isCustomerExists);
 
     const existingCart = await prisma.cart.findFirst({
       where: {
@@ -398,14 +259,10 @@ const getUserUnConfirmOrder = async (email: string) => {
       email,
     },
   });
-  // const allOrder = await prisma.cart.findMany({
-  //   where: {
-  //     customerId:
-  //   }
-  // })
   const allOrders = await prisma.cart.findFirst({
     where: {
       customerId: isCustomerExists!.id,
+      isDeleted: false,
     },
     include: {
       cartItem: true,
@@ -539,8 +396,8 @@ const updateOrder = async (
     totalPrice,
     customerName: idOrderExists.customerName,
     customerEmail: idOrderExists.customerEmail,
-    customerPhone: idOrderExists.customerPhone,
-    customerAddress: idOrderExists.customerShippingAddress,
+    customerPhone: idOrderExists.phoneNumber,
+    customerAddress: idOrderExists.shippingAddress,
   };
 
   const paymentSession = await initiatePayment(paymentData);
@@ -556,8 +413,8 @@ const deleteOrderFromDB = async (
   // check if order exists
   const isOrderExists = await prisma.order.findFirst({
     where: {
-      isDeleted: false,
       customerEmail,
+      isDeleted: false,
     },
   });
 
@@ -583,6 +440,17 @@ const deleteOrderFromDB = async (
     },
     data: {
       isDeleted: true,
+      order: {
+        update: {
+          where: {
+            id: isOrderExists.id,
+            isDeleted: false,
+          },
+          data: {
+            isDeleted: true,
+          },
+        },
+      },
     },
   });
   return result;

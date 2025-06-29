@@ -53,30 +53,37 @@ const prisma_1 = __importDefault(require("../sharred/prisma"));
 const bcrypt = __importStar(require("bcrypt"));
 const seed = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        //atfirst check if the admin exist of not
         const admin = yield prisma_1.default.user.findFirst({
             where: {
                 role: client_1.UserRole.ADMIN,
                 email: config_1.default.admin_email,
-                status: client_1.UserStatus.ACTIVE,
             },
         });
         if (!admin) {
-            console.log("Seeding started...");
-            const hashedPassword = yield bcrypt.hash(config_1.default.admin_password, 12);
-            yield prisma_1.default.user.create({
-                data: {
-                    name: "Mahin",
-                    role: client_1.UserRole.ADMIN,
-                    email: config_1.default.admin_email,
-                    password: hashedPassword,
-                    address: "Dhamrai, Dhaka",
-                    phoneNumber: "0123456789",
-                    status: client_1.UserStatus.ACTIVE,
-                },
-            });
-            console.log("Admin created successfully...");
-            console.log("Seeding completed...");
+            yield prisma_1.default.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
+                //atfirst check if the admin exist of not
+                console.log("Seeding started...");
+                const hashedPassword = yield bcrypt.hash(config_1.default.admin_password, 12);
+                const adminData = yield tx.user.create({
+                    data: {
+                        role: client_1.UserRole.ADMIN,
+                        email: config_1.default.admin_email,
+                        password: hashedPassword,
+                    },
+                });
+                yield tx.admin.create({
+                    data: {
+                        userId: adminData.id,
+                        email: adminData.email,
+                        gender: "MALE",
+                        name: "Mahin",
+                        address: "Dhamrai, Dhaka",
+                        phoneNumber: "0123456789",
+                    },
+                });
+                console.log("Admin created successfully...");
+                console.log("Seeding completed...");
+            }));
         }
     }
     catch (error) {

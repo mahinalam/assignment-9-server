@@ -1,4 +1,4 @@
-import { Order, OrderItem, WishlistItem } from "@prisma/client";
+import { Order, OrderItem, Wishlist } from "@prisma/client";
 import prisma from "../../../sharred/prisma";
 import { initiatePayment } from "../Payment/payment.utils";
 import { paginationHelper } from "../../../helpers/paginationHelper";
@@ -90,8 +90,10 @@ const removeFromWishlistFromDB = async (userId: string, productId: string) => {
   }
   const result = await prisma.wishlist.delete({
     where: {
-      userId,
-      productId,
+      userId_productId: {
+        userId,
+        productId,
+      },
       isDeleted: false,
     },
   });

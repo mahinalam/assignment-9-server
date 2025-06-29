@@ -12,34 +12,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.FollowingShopController = void 0;
+exports.ContactController = void 0;
 const catchAsync_1 = __importDefault(require("../../../sharred/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../../sharred/sendResponse"));
-const followingShop_service_1 = require("./followingShop.service");
-const followShop = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield followingShop_service_1.FollowingShopService.followShop(req.body);
+const contact_servvice_1 = require("./contact.servvice");
+const sendMessage = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield contact_servvice_1.ContactService.sendMessageIntoDB(req.body);
     (0, sendResponse_1.default)(res, {
         statusCode: 200,
         success: true,
-        message: "Successfully Followed Shop!",
+        message: "Message sent successfuly!",
         data: result,
     });
 }));
-// const getAllCategories = catchAsync(async (req, res) => {
-//   const categories = await CategoryService.getAllCategoriesFromDB();
-//   sendResponse(res, {
-//     success: true,
-//     statusCode: 200,
-//     message: "Categories retrieved successfully",
-//     data: categories,
-//   });
-// });
-exports.FollowingShopController = {
-    followShop,
-    //   getAllCategories,
-    //   createCustomer,
-    // getAllFromDB,
-    // changeProfileStatus,
-    // getMyProfile,
-    // updateMyProfie
+exports.ContactController = {
+    sendMessage,
 };

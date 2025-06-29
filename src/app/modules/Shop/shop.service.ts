@@ -220,12 +220,11 @@ const getVendorShop = async (paginationOption: any, user: JwtPayload) => {
   const { limit, page, skip, sortBy, sortOrder } =
     paginationHelper.calculatePagination(paginationOption);
 
-  const result = await prisma.user.findUnique({
+  const result = await prisma.user.findFirst({
     where: {
       id: user?.userId,
       isDeleted: false,
     },
-
     select: {
       vendor: {
         select: {
@@ -233,6 +232,8 @@ const getVendorShop = async (paginationOption: any, user: JwtPayload) => {
             select: {
               name: true,
               id: true,
+              description: true,
+              logo: true,
               product: {
                 where: {
                   isDeleted: false,
@@ -242,13 +243,21 @@ const getVendorShop = async (paginationOption: any, user: JwtPayload) => {
                   images: true,
                   id: true,
                   stock: true,
+                  price: true,
                   discount: true,
+                  longDescription: true,
+                  shortDescription: true,
                   category: {
                     select: {
                       name: true,
                       id: true,
                     },
                   },
+                },
+                take: limit,
+                skip: skip,
+                orderBy: {
+                  [sortBy || "createdAt"]: sortOrder || "desc",
                 },
               },
             },
@@ -257,37 +266,6 @@ const getVendorShop = async (paginationOption: any, user: JwtPayload) => {
       },
     },
   });
-  //   select: {
-  //   vendor: {
-  //     select: {
-  //       shop: {
-  //         select: {
-  //           name: true,
-  //           id: true,
-  //           product: {
-  //             where: {
-  //               isDeleted: false,
-  //             },
-  //             include: {
-  //               category: {
-  //                 select: {
-  //                   id: true,
-  //                   name: true,
-  //                 },
-  //               },
-  //             },
-  //             skip: skip,
-  //             take: limit,
-  //             orderBy: {
-  //               [sortBy || "createdAt"]: sortOrder || "desc",
-  //             },
-  //           },
-  //         },
-  //       },
-  //     },
-  //   },
-  // },
-  console.log("reesult", result);
 
   const total = await prisma.product.count({
     where: {

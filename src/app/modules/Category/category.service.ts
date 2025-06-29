@@ -41,7 +41,11 @@ const getAllCategoriesFromDB = async (paginationOption: any) => {
     },
   });
 
-  const total = await prisma.category.count();
+  const total = await prisma.category.count({
+    where: {
+      isDeleted: false,
+    },
+  });
   return {
     meta: {
       page,

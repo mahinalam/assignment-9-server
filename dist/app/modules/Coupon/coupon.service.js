@@ -15,7 +15,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CouponService = void 0;
 const prisma_1 = __importDefault(require("../../../sharred/prisma"));
 const ApiError_1 = __importDefault(require("../../errors/ApiError"));
+const paginationHelper_1 = require("../../../helpers/paginationHelper");
 const createCouponIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+    // check is coupon exits
+    const isCouponExists = yield prisma_1.default.coupon.findFirst({
+        where: {
+            code: payload.code,
+            isDeleted: false,
+        },
+    });
+    if (isCouponExists) {
+        throw new ApiError_1.default(400, "Coupon alreday exists.");
+    }
     const result = yield prisma_1.default.coupon.create({
         data: payload,
     });
@@ -40,12 +51,42 @@ const applyCouponCode = (code) => __awaiter(void 0, void 0, void 0, function* ()
     }
     return isCouponExists;
 });
-const getAllCoupon = () => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield prisma_1.default.coupon.findMany();
+const getAllCoupon = (paginationOption) => __awaiter(void 0, void 0, void 0, function* () {
+    const { limit, page, skip, sortBy, sortOrder } = paginationHelper_1.paginationHelper.calculatePagination(paginationOption);
+    const result = yield prisma_1.default.coupon.findMany({
+        where: { isDeleted: false },
+        skip: skip,
+        take: limit,
+        orderBy: {
+            [sortBy || "createdAt"]: sortOrder || "desc",
+        },
+    });
+    const total = yield prisma_1.default.coupon.count();
+    return {
+        meta: {
+            page,
+            limit,
+            total,
+        },
+        data: result,
+    };
+});
+// delete coupon
+const deleteCouponFromDB = (couponId) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield prisma_1.default.coupon.update({
+        where: {
+            id: couponId,
+            isDeleted: false,
+        },
+        data: {
+            isDeleted: true,
+        },
+    });
     return result;
 });
 exports.CouponService = {
     createCouponIntoDB,
     getAllCoupon,
     applyCouponCode,
+    deleteCouponFromDB,
 };

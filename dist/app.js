@@ -39,28 +39,3 @@ app.use((req, res, next) => {
     });
 });
 exports.default = app;
-// import Navbar from "@/app/components/sharred/Navbar";
-// export default function layout({ children }: { children: React.ReactNode }) {
-//   return (
-//     <div className="relative flex flex-col h-screen w-[90%] mx-auto">
-//       <Navbar />
-//       <main>{children}</main>
-//     </div>
-//   );
-// }
-// ("use client");
-// import Categories from "@/app/components/home/Categories/Categories";
-// import FlashSale from "@/app/components/home/FlashSale/FlashSale";
-// import JustForYou from "@/app/components/home/JustForYou/JustForYou";
-// import Container from "@/app/components/sharred/Container";
-// import React from "react";
-// const Home = () => {
-//   return (
-//     <Container>
-//       <FlashSale />
-//       <Categories />
-//       <JustForYou />
-//     </Container>
-//   );
-// };
-// export default Home;

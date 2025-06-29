@@ -36,7 +36,40 @@ const getAllProducts = (0, catchAsync_1.default)((req, res) => __awaiter(void 0,
         statusCode: 200,
         success: true,
         message: "Products retrieval successfully",
-        // meta: result.meta,
+        data: result,
+    });
+}));
+// get all featured products
+const getAllFeaturedProducts = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    // pagination pick
+    const paginationOption = (0, pick_1.default)(req.query, [
+        "limit",
+        "page",
+        "sortBy",
+        "sortOrder",
+    ]);
+    const result = yield product_service_1.ProductService.getAllFeaturedProductsFromDB(paginationOption);
+    (0, sendResponse_1.default)(res, {
+        statusCode: 200,
+        success: true,
+        message: "Featured products retrieval successfully",
+        data: result,
+    });
+}));
+// get all flash products
+const getAllFlashProducts = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    // pagination pick
+    const paginationOption = (0, pick_1.default)(req.query, [
+        "limit",
+        "page",
+        "sortBy",
+        "sortOrder",
+    ]);
+    const result = yield product_service_1.ProductService.getAllFlashProductsFromDB(paginationOption);
+    (0, sendResponse_1.default)(res, {
+        statusCode: 200,
+        success: true,
+        message: "Flash products retrieval successfully",
         data: result,
     });
 }));
@@ -82,8 +115,6 @@ const getSingleProductFromDB = (0, catchAsync_1.default)((req, res) => __awaiter
     });
 }));
 const createProduct = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("files", req.files);
-    console.log("body", req.body);
     if (!req.files) {
         throw new ApiError_1.default(400, "Please upload an image");
     }
@@ -91,7 +122,7 @@ const createProduct = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, 
     (0, sendResponse_1.default)(res, {
         statusCode: 200,
         success: true,
-        message: "Product Added successfuly!",
+        message: "Product Created successfuly!",
         data: result,
     });
 }));
@@ -105,13 +136,44 @@ const getAllVendorProducts = (0, catchAsync_1.default)((req, res) => __awaiter(v
         data: products,
     });
 }));
-const updateVendorShopProduct = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { id } = req.params;
-    const result = yield product_service_1.ProductService.updateVendorProductIntoDB(id, req.body);
+// const getVendorProducts = catchAsync(async (req, res) => {
+//   console.log("hi");
+//   //pick
+//   const filterFields = pick(req.query, vendorProductFilterableFields);
+//   // pagination pick
+//   const paginationOption = pick(req.query, [
+//     "limit",
+//     "page",
+//     "sortBy",
+//     "sortOrder",
+//   ]);
+//   const result = await ProductService.getVendorProductsFromDB(
+//     filterFields,
+//     paginationOption
+//   );
+//   sendResponse(res, {
+//     statusCode: 200,
+//     success: true,
+//     message: "Vendor products retrieval successfully",
+//     data: result,
+//   });
+// });
+const updateProductIntoDB = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield product_service_1.ProductService.updateProductIntoDB(req.body, req.files);
     (0, sendResponse_1.default)(res, {
         statusCode: 200,
         success: true,
         message: "Product Updated successfuly!",
+        data: result,
+    });
+}));
+// update product status
+const updateProductStatus = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield product_service_1.ProductService.updateProductStatusIntoDB(req.body);
+    (0, sendResponse_1.default)(res, {
+        statusCode: 200,
+        success: true,
+        message: "Product updated successfuly!",
         data: result,
     });
 }));
@@ -130,6 +192,9 @@ exports.ProductController = {
     getSingleProductFromDB,
     createProduct,
     getAllVendorProducts,
-    updateVendorShopProduct,
+    updateProductIntoDB,
     deleteVendorShopProduct,
+    getAllFeaturedProducts,
+    getAllFlashProducts,
+    updateProductStatus,
 };

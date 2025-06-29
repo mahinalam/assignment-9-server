@@ -47,8 +47,9 @@ const clearCart = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void
     });
 }));
 const userCart = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { userId } = req.user;
-    const orders = yield cart_service_1.CartService.getUserCart(userId);
+    var _a, _b;
+    const orders = yield cart_service_1.CartService.getUserCart((_a = req === null || req === void 0 ? void 0 : req.user) === null || _a === void 0 ? void 0 : _a.userId);
+    console.log("user id", (_b = req.user) === null || _b === void 0 ? void 0 : _b.userId);
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: 200,

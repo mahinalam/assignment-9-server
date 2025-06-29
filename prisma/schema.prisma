@@ -129,7 +129,6 @@ model Product {
   shopId           String
   categoryId       String
   shortDescription String?
-  features         String[]
   longDescription  String
 
   shop      Shop        @relation(fields: [shopId], references: [id])
