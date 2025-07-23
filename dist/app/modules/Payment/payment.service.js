@@ -15,7 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.paymentServices = void 0;
 /* eslint-disable no-unused-vars */
 const path_1 = require("path");
-// import orderModel from '../order/order.model';
 const payment_utils_1 = require("./payment.utils");
 const fs_1 = require("fs");
 const prisma_1 = __importDefault(require("../../../sharred/prisma"));
@@ -52,12 +51,6 @@ const confirmationService = (transactionId, status) => __awaiter(void 0, void 0,
     template = template.replace(`{{message}}`, message);
     return template;
 });
-// const getAllPaymentsFromDB = async () => {
-//   const result = await Payment.find().populate("userId");
-//   // .populate('category');
-//   return result;
-// };
 exports.paymentServices = {
     confirmationService,
-    //   getAllPaymentsFromDB,
 };

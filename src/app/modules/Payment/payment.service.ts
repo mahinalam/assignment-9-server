@@ -1,6 +1,5 @@
 /* eslint-disable no-unused-vars */
 import { join } from "path";
-// import orderModel from '../order/order.model';
 import { verifyPayment } from "./payment.utils";
 import { readFileSync } from "fs";
 import prisma from "../../../sharred/prisma";
@@ -45,13 +44,6 @@ const confirmationService = async (transactionId: string, status: string) => {
   return template;
 };
 
-// const getAllPaymentsFromDB = async () => {
-//   const result = await Payment.find().populate("userId");
-//   // .populate('category');
-//   return result;
-// };
-
 export const paymentServices = {
   confirmationService,
-  //   getAllPaymentsFromDB,
 };

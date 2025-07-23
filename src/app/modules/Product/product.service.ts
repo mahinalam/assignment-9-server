@@ -153,6 +153,7 @@ const getAllFeaturedProductsFromDB = async (paginationOption: any) => {
       shop: {
         select: {
           name: true,
+          id: true,
         },
       },
       price: true,
@@ -199,6 +200,7 @@ const getAllFlashProductsFromDB = async (paginationOption: any) => {
       shop: {
         select: {
           name: true,
+          id: true,
         },
       },
       review: {

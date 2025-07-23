@@ -13,24 +13,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.verifyPayment = exports.initiatePayment = void 0;
-/* eslint-disable @typescript-eslint/no-explicit-any */
 const axios_1 = __importDefault(require("axios"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
-// export const initiatePayment = async (paymentData: any) => {
-//   try {
-//   } catch (err) {
-//     throw new Error("Payment initiation failed!");
-//   }
-// };
 const initiatePayment = (paymentData) => __awaiter(void 0, void 0, void 0, function* () {
     const response = yield axios_1.default.post(process.env.PAYMENT_URL, {
         store_id: process.env.STORE_ID,
         signature_key: process.env.SIGNATURE_KEY,
         tran_id: paymentData.transactionId,
-        success_url: `http://localhost:5000/api/v1/payment/confirmation?transactionId=${paymentData.transactionId}&status=success`,
-        fail_url: `http://localhost:5000/api/v1/payment/confirmation?status=failed`,
-        cancel_url: "http://localhost:3000",
+        success_url: `https://electromert-ecommerce-server.vercel.app/api/v1/payment/confirmation?transactionId=${paymentData.transactionId}&status=success`,
+        fail_url: `https://electromert-ecommerce-server.vercel.app/api/v1/payment/confirmation?status=failed`,
+        cancel_url: "https://electromert-ecommerce-client.vercel.app",
         amount: paymentData.totalPrice,
         currency: "BDT",
         desc: "Merchant Registration Payment",
@@ -58,11 +51,9 @@ const verifyPayment = (tnxId) => __awaiter(void 0, void 0, void 0, function* () 
                 request_id: tnxId,
             },
         });
-        console.log("response data", response);
         return response.data;
     }
     catch (err) {
-        console.log(err);
         throw new Error("Payment validation failed!");
     }
 });

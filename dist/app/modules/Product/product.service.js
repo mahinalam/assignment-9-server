@@ -151,6 +151,7 @@ const getAllFeaturedProductsFromDB = (paginationOption) => __awaiter(void 0, voi
             shop: {
                 select: {
                     name: true,
+                    id: true,
                 },
             },
             price: true,
@@ -195,6 +196,7 @@ const getAllFlashProductsFromDB = (paginationOption) => __awaiter(void 0, void 0
             shop: {
                 select: {
                     name: true,
+                    id: true,
                 },
             },
             review: {

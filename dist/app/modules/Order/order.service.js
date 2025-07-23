@@ -83,7 +83,6 @@ const createOrderIntoDB = (userId, payload) => __awaiter(void 0, void 0, void 0,
                 cartItem: true,
             },
         });
-        console.log("cartItem"), existingCart;
         for (const item of existingCart.cartItem) {
             yield tx.cartItem.deleteMany({
                 where: { cartId: existingCart.id },

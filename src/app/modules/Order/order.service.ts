@@ -87,7 +87,6 @@ export const createOrderIntoDB = async (userId: any, payload: any) => {
         cartItem: true,
       },
     });
-    console.log("cartItem"), existingCart;
     for (const item of existingCart!.cartItem) {
       await tx.cartItem.deleteMany({
         where: { cartId: existingCart!.id },

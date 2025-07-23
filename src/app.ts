@@ -7,13 +7,10 @@ import globalErrorHandler from "./app/middlewares/globalErrorHanlder";
 const app: Application = express();
 app.use(
   cors({
-    origin: [
-      "https://electromert-e-commerce-client.vercel.app", // Production frontend
-    ],
-    credentials: true, // Allow cookies, authorization headers, etc.
+    origin: ["https://electromert-ecommerce-client.vercel.app"],
+    credentials: true,
   })
 );
-// app.use(cors());
 app.use(cookieParser());
 
 //parser

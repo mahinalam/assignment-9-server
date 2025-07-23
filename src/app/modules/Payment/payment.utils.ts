@@ -1,23 +1,15 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
 import dotenv from "dotenv";
 dotenv.config();
-
-// export const initiatePayment = async (paymentData: any) => {
-//   try {
-//   } catch (err) {
-//     throw new Error("Payment initiation failed!");
-//   }
-// };
 
 export const initiatePayment = async (paymentData: any) => {
   const response = await axios.post(process.env.PAYMENT_URL as string, {
     store_id: process.env.STORE_ID,
     signature_key: process.env.SIGNATURE_KEY,
     tran_id: paymentData.transactionId,
-    success_url: `http://localhost:5000/api/v1/payment/confirmation?transactionId=${paymentData.transactionId}&status=success`,
-    fail_url: `http://localhost:5000/api/v1/payment/confirmation?status=failed`,
-    cancel_url: "http://localhost:3000",
+    success_url: `https://electromert-ecommerce-server.vercel.app/api/v1/payment/confirmation?transactionId=${paymentData.transactionId}&status=success`,
+    fail_url: `https://electromert-ecommerce-server.vercel.app/api/v1/payment/confirmation?status=failed`,
+    cancel_url: "https://electromert-ecommerce-client.vercel.app",
     amount: paymentData.totalPrice,
     currency: "BDT",
     desc: "Merchant Registration Payment",
@@ -45,10 +37,8 @@ export const verifyPayment = async (tnxId: string) => {
         request_id: tnxId,
       },
     });
-    console.log("response data", response);
     return response.data;
   } catch (err) {
-    console.log(err);
     throw new Error("Payment validation failed!");
   }
 };
