@@ -14,7 +14,6 @@ export const createOrderIntoDB = async (userId: any, payload: any) => {
     phoneNumber,
   } = payload;
 
-  // find subscription throw email
   const isSubscribed = await prisma.newsLetter.findFirst({
     where: {
       email: customerEmail,
@@ -34,85 +33,82 @@ export const createOrderIntoDB = async (userId: any, payload: any) => {
     .toString(36)
     .substring(2, 10)}`;
 
-  // cretae order
-  const result = await prisma.$transaction(async (tx) => {
-    const order = await tx.order.create({
-      data: {
-        totalPrice,
-        transactionId,
-        shopId,
-        customerName,
-        customerEmail,
-        phoneNumber,
-        shippingAddress,
-      },
-    });
-
-    // create order items
-    const itemsToCreate = orderItems.map((item: OrderItem) => ({
-      orderId: order.id,
-      productId: item.productId,
-      quantity: item.quantity,
-      price: item.price,
-    }));
-
-    await tx.orderItem.createMany({
-      data: itemsToCreate,
-    });
-
-    if (isSubscribed) {
-      await tx.newsLetter.update({
-        where: {
-          email: customerEmail,
-          isDeleted: false,
-        },
-        data: {
-          isDeleted: true,
-        },
-      });
-    }
-
-    const isCustomerExists = await prisma.customer.findFirst({
-      where: {
-        userId,
-        isDeleted: false,
-      },
-    });
-
-    const existingCart = await prisma.cart.findFirst({
-      where: {
-        customerId: isCustomerExists!.id,
-      },
-      include: {
-        cartItem: true,
-      },
-    });
-    for (const item of existingCart!.cartItem) {
-      await tx.cartItem.deleteMany({
-        where: { cartId: existingCart!.id },
-      });
-    }
-
-    // Step 2.3: Clear the user's cart and cart items after confirming the order
-    await tx.cart.delete({
-      where: { id: existingCart!.id },
-    });
-
-    const paymentData = {
-      transactionId,
-      totalPrice,
-      customerName,
-      customerEmail,
-      customerPhone: phoneNumber,
-      customerAddress: shippingAddress,
-    };
-
-    const paymentSession = await initiatePayment(paymentData);
-
-    return paymentSession;
+  // Fetch cart before transaction
+  const existingCart = await prisma.cart.findFirst({
+    where: {
+      customerId: userId,
+    },
+    include: {
+      cartItem: true,
+    },
   });
 
-  return result;
+  // Prisma transaction
+  const orderResult = await prisma.$transaction(
+    async (tx) => {
+      const order = await tx.order.create({
+        data: {
+          totalPrice,
+          transactionId,
+          shopId,
+          customerName,
+          customerEmail,
+          phoneNumber,
+          shippingAddress,
+        },
+      });
+
+      const itemsToCreate = orderItems.map((item: OrderItem) => ({
+        orderId: order.id,
+        productId: item.productId,
+        quantity: item.quantity,
+        price: item.price,
+      }));
+
+      await tx.orderItem.createMany({
+        data: itemsToCreate,
+      });
+
+      if (isSubscribed) {
+        await tx.newsLetter.update({
+          where: {
+            email: customerEmail,
+          },
+          data: {
+            isDeleted: true,
+          },
+        });
+      }
+
+      // Clean up cart items and cart only if found
+      if (existingCart) {
+        await tx.cartItem.deleteMany({
+          where: { cartId: existingCart.id },
+        });
+
+        await tx.cart.delete({
+          where: { id: existingCart.id },
+        });
+      }
+
+      return {
+        transactionId,
+        totalPrice,
+        customerName,
+        customerEmail,
+        customerPhone: phoneNumber,
+        customerAddress: shippingAddress,
+      };
+    },
+    {
+      timeout: 30000,
+    }
+  );
+
+  // Move external call OUTSIDE transaction
+  const paymentSession = await initiatePayment(orderResult);
+
+  return paymentSession;
 };
 
 const getVendorOrderHistory = async (paginationOption: any, email: string) => {

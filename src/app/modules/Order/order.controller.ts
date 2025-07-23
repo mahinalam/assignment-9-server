@@ -6,7 +6,6 @@ import pick from "../../../sharred/pick";
 
 const createOrder = catchAsync(async (req: Request, res: Response) => {
   const { userId } = req.user;
-  console.log("order", req.body);
   const result = await OrderService.createOrderIntoDB(userId, req.body);
 
   sendResponse(res, {

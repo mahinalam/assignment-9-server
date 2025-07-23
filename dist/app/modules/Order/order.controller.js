@@ -19,7 +19,6 @@ const order_service_1 = require("./order.service");
 const pick_1 = __importDefault(require("../../../sharred/pick"));
 const createOrder = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { userId } = req.user;
-    console.log("order", req.body);
     const result = yield order_service_1.OrderService.createOrderIntoDB(userId, req.body);
     (0, sendResponse_1.default)(res, {
         statusCode: 200,
