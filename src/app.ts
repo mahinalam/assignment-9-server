@@ -7,7 +7,10 @@ import globalErrorHandler from "./app/middlewares/globalErrorHanlder";
 const app: Application = express();
 app.use(
   cors({
-    origin: ["https://electromert-ecommerce-client.vercel.app"],
+    origin: [
+      "https://electromert-ecommerce-client.vercel.app",
+      "http://localhost:3001",
+    ],
     credentials: true,
   })
 );

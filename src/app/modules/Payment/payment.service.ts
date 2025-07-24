@@ -8,7 +8,6 @@ import prisma from "../../../sharred/prisma";
 const confirmationService = async (transactionId: string, status: string) => {
   const verifyResponse = await verifyPayment(transactionId);
 
-  let result;
   let message;
 
   if (verifyResponse && verifyResponse.pay_status === "Successful") {
