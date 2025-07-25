@@ -10,7 +10,10 @@ const routes_1 = __importDefault(require("./app/routes"));
 const globalErrorHanlder_1 = __importDefault(require("./app/middlewares/globalErrorHanlder"));
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)({
-    origin: ["https://electromert-ecommerce-client.vercel.app"],
+    origin: [
+        "https://electromert-ecommerce-client.vercel.app",
+        "http://localhost:3001",
+    ],
     credentials: true,
 }));
 app.use((0, cookie_parser_1.default)());

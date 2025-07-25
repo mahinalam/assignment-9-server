@@ -19,6 +19,7 @@ const paginationHelper_1 = require("../../../helpers/paginationHelper");
 const ApiError_1 = __importDefault(require("../../errors/ApiError"));
 const createOrderIntoDB = (userId, payload) => __awaiter(void 0, void 0, void 0, function* () {
     const { shippingAddress, orderItems, shopId, customerName, customerEmail, phoneNumber, } = payload;
+    // find subscription throw email
     const isSubscribed = yield prisma_1.default.newsLetter.findFirst({
         where: {
             email: customerEmail,
@@ -28,23 +29,23 @@ const createOrderIntoDB = (userId, payload) => __awaiter(void 0, void 0, void 0,
     let totalPrice = orderItems.reduce((total, item) => {
         return total + Number(item.price) * Number(item.quantity);
     }, 100);
-    if (isSubscribed) {
-        totalPrice = totalPrice * 0.8;
-    }
     const transactionId = `txn_${Date.now()}_${Math.random()
         .toString(36)
         .substring(2, 10)}`;
-    // Fetch cart before transaction
-    const existingCart = yield prisma_1.default.cart.findFirst({
-        where: {
-            customerId: userId,
-        },
-        include: {
-            cartItem: true,
-        },
-    });
-    // Prisma transaction
-    const orderResult = yield prisma_1.default.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
+    // cretae order
+    const result = yield prisma_1.default.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
+        if (isSubscribed) {
+            totalPrice = totalPrice * 0.8;
+            yield tx.newsLetter.update({
+                where: {
+                    email: customerEmail,
+                    isDeleted: false,
+                },
+                data: {
+                    isDeleted: true,
+                },
+            });
+        }
         const order = yield tx.order.create({
             data: {
                 totalPrice,
@@ -56,6 +57,7 @@ const createOrderIntoDB = (userId, payload) => __awaiter(void 0, void 0, void 0,
                 shippingAddress,
             },
         });
+        // create order items
         const itemsToCreate = orderItems.map((item) => ({
             orderId: order.id,
             productId: item.productId,
@@ -65,26 +67,7 @@ const createOrderIntoDB = (userId, payload) => __awaiter(void 0, void 0, void 0,
         yield tx.orderItem.createMany({
             data: itemsToCreate,
         });
-        if (isSubscribed) {
-            yield tx.newsLetter.update({
-                where: {
-                    email: customerEmail,
-                },
-                data: {
-                    isDeleted: true,
-                },
-            });
-        }
-        // Clean up cart items and cart only if found
-        if (existingCart) {
-            yield tx.cartItem.deleteMany({
-                where: { cartId: existingCart.id },
-            });
-            yield tx.cart.delete({
-                where: { id: existingCart.id },
-            });
-        }
-        return {
+        const paymentData = {
             transactionId,
             totalPrice,
             customerName,
@@ -92,11 +75,35 @@ const createOrderIntoDB = (userId, payload) => __awaiter(void 0, void 0, void 0,
             customerPhone: phoneNumber,
             customerAddress: shippingAddress,
         };
-    }), {
-        timeout: 30000,
+        return paymentData;
+    }));
+    const isCustomerExists = yield prisma_1.default.customer.findFirst({
+        where: {
+            userId,
+            isDeleted: false,
+        },
+        select: {
+            id: true,
+        },
     });
-    // Move external call OUTSIDE transaction
-    const paymentSession = yield (0, payment_utils_1.initiatePayment)(orderResult);
+    const existingCart = yield prisma_1.default.cart.findFirst({
+        where: {
+            customerId: isCustomerExists.id,
+        },
+        include: {
+            cartItem: true,
+        },
+    });
+    for (const item of existingCart.cartItem) {
+        yield prisma_1.default.cartItem.deleteMany({
+            where: { cartId: existingCart.id },
+        });
+    }
+    // Step 2.3: Clear the user's cart and cart items after confirming the order
+    yield prisma_1.default.cart.delete({
+        where: { id: existingCart.id },
+    });
+    const paymentSession = yield (0, payment_utils_1.initiatePayment)(result);
     return paymentSession;
 });
 exports.createOrderIntoDB = createOrderIntoDB;

@@ -21,7 +21,6 @@ const prisma_1 = __importDefault(require("../../../sharred/prisma"));
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const confirmationService = (transactionId, status) => __awaiter(void 0, void 0, void 0, function* () {
     const verifyResponse = yield (0, payment_utils_1.verifyPayment)(transactionId);
-    let result;
     let message;
     if (verifyResponse && verifyResponse.pay_status === "Successful") {
         yield prisma_1.default.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
