@@ -22,18 +22,11 @@ exports.default = {
     cloudinary_api_secret: process.env.CLOUDINARY_API_SECRET,
     admin_email: process.env.ADMIN_EMAIL,
     admin_password: process.env.ADMIN_PASS,
-    // reset_pass_link: process.env.RESET_PASS_LINK,
-    // emailSender: {
-    //     email: process.env.EMAIL,
-    //     app_pass: process.env.APP_PASS
-    // },
-    // ssl: {
-    //     storeId: process.env.STORE_ID,
-    //     storePass: process.env.STORE_PASS,
-    //     successUrl: process.env.SUCCESS_URL,
-    //     cancelUrl: process.env.CANCEL_URL,
-    //     failUrl: process.env.FAIL_URL,
-    //     sslPaymentApi: process.env.SSL_PAYMENT_API,
-    //     sslValidationApi: process.env.SSL_VALIDATIOIN_API
-    // }
+    store_id: process.env.STORE_ID,
+    store_password: process.env.STORE_PASSWORD,
+    payment_success_url: process.env.PAYMENT_SUCCESS_URL,
+    payment_fail_url: process.env.PAYMENT_FAIL_URL,
+    payment_cancel_url: process.env.PAYMENT_CANCEL_URL,
+    valid_success_token: process.env.VALID_SUCCESS_TOKEN,
+    valid_failed_token: process.env.VALID_FAILED_TOKEN,
 };

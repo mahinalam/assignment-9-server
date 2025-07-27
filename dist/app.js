@@ -12,7 +12,7 @@ const app = (0, express_1.default)();
 app.use((0, cors_1.default)({
     origin: [
         "https://electromert-ecommerce-client.vercel.app",
-        "http://localhost:3001",
+        "http://localhost:3000",
     ],
     credentials: true,
 }));

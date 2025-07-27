@@ -4,6 +4,7 @@ import sendResponse from "../../../sharred/sendResponse";
 import { OrderService } from "./order.service";
 import pick from "../../../sharred/pick";
 
+// create order
 const createOrder = catchAsync(async (req: Request, res: Response) => {
   const { userId } = req.user;
   const result = await OrderService.createOrderIntoDB(userId, req.body);
@@ -16,6 +17,7 @@ const createOrder = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// vendor order history
 const getVendorOrderHistory = catchAsync(async (req, res) => {
   const paginationOption = pick(req.query, [
     "limit",
@@ -37,6 +39,7 @@ const getVendorOrderHistory = catchAsync(async (req, res) => {
   });
 });
 
+// users order history
 const getUsersOrderHistory = catchAsync(async (req, res) => {
   const { email } = req.user;
   const paginationOption = pick(req.query, [
@@ -58,6 +61,7 @@ const getUsersOrderHistory = catchAsync(async (req, res) => {
   });
 });
 
+// all orders
 const getAllOrderHistory = catchAsync(async (req, res) => {
   const paginationOption = pick(req.query, [
     "limit",
@@ -75,6 +79,7 @@ const getAllOrderHistory = catchAsync(async (req, res) => {
   });
 });
 
+// users unconfirm order
 const getUserUnconfirmOrder = catchAsync(async (req, res) => {
   const { email } = req.user;
   const orders = await OrderService.getUserUnConfirmOrder(email);
@@ -83,18 +88,6 @@ const getUserUnconfirmOrder = catchAsync(async (req, res) => {
     success: true,
     statusCode: 200,
     message: "Order retrieved successfully",
-    data: orders,
-  });
-});
-
-const updateOrderStatus = catchAsync(async (req, res) => {
-  const { userId } = req.user;
-  const orders = await OrderService.updateOrder(userId, req.body);
-
-  sendResponse(res, {
-    success: true,
-    statusCode: 200,
-    message: "Order updated successfully",
     data: orders,
   });
 });
@@ -119,6 +112,5 @@ export const OrderController = {
   getUsersOrderHistory,
   getAllOrderHistory,
   getUserUnconfirmOrder,
-  updateOrderStatus,
   deleteOrder,
 };

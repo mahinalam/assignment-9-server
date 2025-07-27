@@ -328,82 +328,6 @@ const getUserUnConfirmOrder = async (email: string) => {
 //   // return orders;
 // };
 
-const updateOrder = async (
-  userId: string,
-  payload: {
-    transactionId: string;
-    totalPrice: number;
-  }
-) => {
-  const { transactionId, totalPrice } = payload;
-
-  // Check if the order exists
-  const idOrderExists = await prisma.order.findUniqueOrThrow({
-    where: { transactionId },
-  });
-
-  if (idOrderExists.status !== "PENDING") {
-    throw new Error("Order status must be PENDING to confirm.");
-  }
-
-  // Step 2: Update order status and handle stock decrement in a transaction
-  await prisma.$transaction(async (tx) => {
-    // Step 2.1: Update order status
-    const order = await tx.order.update({
-      where: { transactionId },
-      data: {
-        status: "CONFIRMED",
-        totalPrice, // Update totalPrice here if needed
-      },
-      include: { orderItem: true },
-    });
-
-    for (const item of order.orderItem) {
-      await tx.product.update({
-        where: { id: item.productId },
-        data: { stock: { decrement: item.quantity } },
-      });
-    }
-
-    // step:2 find the cart
-
-    const existingCart = await prisma.cart.findFirst({
-      where: {
-        customerId: userId,
-      },
-      include: {
-        cartItem: true,
-      },
-    });
-    for (const item of existingCart!.cartItem) {
-      await tx.cartItem.deleteMany({
-        where: { cartId: existingCart!.id },
-      });
-    }
-
-    // Step 2.3: Clear the user's cart and cart items after confirming the order
-    await tx.cart.delete({
-      where: { id: existingCart!.id },
-    });
-  });
-
-  console.log("Order confirmed and cart cleared for User ID:", userId);
-
-  // Step 3: Initiate the payment session
-  const paymentData = {
-    transactionId,
-    totalPrice,
-    customerName: idOrderExists.customerName,
-    customerEmail: idOrderExists.customerEmail,
-    customerPhone: idOrderExists.phoneNumber,
-    customerAddress: idOrderExists.shippingAddress,
-  };
-
-  const paymentSession = await initiatePayment(paymentData);
-
-  return paymentSession;
-};
-
 // delete order
 const deleteOrderFromDB = async (
   customerEmail: string,
@@ -461,6 +385,5 @@ export const OrderService = {
   getUsersOrderHistory,
   getAllOrderHistory,
   getUserUnConfirmOrder,
-  updateOrder,
   deleteOrderFromDB,
 };

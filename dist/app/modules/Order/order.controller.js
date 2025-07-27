@@ -17,6 +17,7 @@ const catchAsync_1 = __importDefault(require("../../../sharred/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../../sharred/sendResponse"));
 const order_service_1 = require("./order.service");
 const pick_1 = __importDefault(require("../../../sharred/pick"));
+// create order
 const createOrder = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { userId } = req.user;
     const result = yield order_service_1.OrderService.createOrderIntoDB(userId, req.body);
@@ -27,6 +28,7 @@ const createOrder = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, vo
         data: result,
     });
 }));
+// vendor order history
 const getVendorOrderHistory = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const paginationOption = (0, pick_1.default)(req.query, [
         "limit",
@@ -43,6 +45,7 @@ const getVendorOrderHistory = (0, catchAsync_1.default)((req, res) => __awaiter(
         data: orders,
     });
 }));
+// users order history
 const getUsersOrderHistory = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email } = req.user;
     const paginationOption = (0, pick_1.default)(req.query, [
@@ -59,6 +62,7 @@ const getUsersOrderHistory = (0, catchAsync_1.default)((req, res) => __awaiter(v
         data: orders,
     });
 }));
+// all orders
 const getAllOrderHistory = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const paginationOption = (0, pick_1.default)(req.query, [
         "limit",
@@ -74,6 +78,7 @@ const getAllOrderHistory = (0, catchAsync_1.default)((req, res) => __awaiter(voi
         data: orders,
     });
 }));
+// users unconfirm order
 const getUserUnconfirmOrder = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email } = req.user;
     const orders = yield order_service_1.OrderService.getUserUnConfirmOrder(email);
@@ -81,16 +86,6 @@ const getUserUnconfirmOrder = (0, catchAsync_1.default)((req, res) => __awaiter(
         success: true,
         statusCode: 200,
         message: "Order retrieved successfully",
-        data: orders,
-    });
-}));
-const updateOrderStatus = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { userId } = req.user;
-    const orders = yield order_service_1.OrderService.updateOrder(userId, req.body);
-    (0, sendResponse_1.default)(res, {
-        success: true,
-        statusCode: 200,
-        message: "Order updated successfully",
         data: orders,
     });
 }));
@@ -112,6 +107,5 @@ exports.OrderController = {
     getUsersOrderHistory,
     getAllOrderHistory,
     getUserUnconfirmOrder,
-    updateOrderStatus,
     deleteOrder,
 };

@@ -1,14 +1,21 @@
 import { Request, Response } from "express";
 import { paymentServices } from "./payment.service";
+import config from "../../../config";
 
 const paymentConfirmationController = async (req: Request, res: Response) => {
-  const { transactionId, status } = req.query;
+  const successPayment = req.body;
 
-  const result = await paymentServices.confirmationService(
-    transactionId as string,
-    status as string
+  const isVerifiedSuccess = await paymentServices.confirmationService(
+    successPayment
   );
-  res.send(result);
+  if (!isVerifiedSuccess) {
+    return res.redirect(
+      `${config.payment_cancel_url}/payment/success?token=${config.valid_success_token}`
+    );
+  }
+  return res.redirect(
+    `${config.payment_cancel_url}/payment/failed?token=${config.valid_failed_token}`
+  );
 };
 
 export const PaymentController = {

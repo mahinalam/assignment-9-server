@@ -9,7 +9,7 @@ app.use(
   cors({
     origin: [
       "https://electromert-ecommerce-client.vercel.app",
-      "http://localhost:3001",
+      "http://localhost:3000",
     ],
     credentials: true,
   })
