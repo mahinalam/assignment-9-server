@@ -193,7 +193,17 @@ const getAllOrderHistory = async (paginationOption: any) => {
       [sortBy || "createdAt"]: sortOrder || "desc",
     },
     include: {
-      orderItem: true,
+      orderItem: {
+        include: {
+          product: {
+            select: {
+              id: true,
+              name: true,
+              images: true,
+            },
+          },
+        },
+      },
       shop: true,
     },
   });
@@ -270,63 +280,6 @@ const getUserUnConfirmOrder = async (email: string) => {
 
   return allOrders;
 };
-
-// const updateOrder = async (payload: {
-//   transactionId: string;
-//   totalPrice: number;
-// }) => {
-//   const { transactionId, totalPrice } = payload;
-
-//   // chcek if the order exists
-//   const idOrderExists = await prisma.order.findUniqueOrThrow({
-//     where: {
-//       transactionId,
-//     },
-//   });
-
-//   if (idOrderExists.orderStatus !== "PENDING") {
-//     throw new Error("Order status must be PENDING to confirm.");
-//   }
-
-//   // Step 2: Update order status and handle stock decrement in a transaction
-//   await prisma.$transaction(async (tx) => {
-//     // Update the order
-//     const order = await tx.order.update({
-//       where: { transactionId },
-//       data: {
-//         orderStatus: "CONFIRMED",
-//         totalPrice,
-//       },
-//       include: { orderItems: true },
-//     });
-
-//     // Decrement product quantities
-//     for (const item of order.orderItems) {
-//       await tx.product.update({
-//         where: { id: item.productId },
-//         data: { stock: { decrement: item.quantity } },
-//       });
-//     }
-
-//     return order;
-//   });
-
-//   const paymentData = {
-//     transactionId,
-//     totalPrice,
-//     customerName: idOrderExists.customerName,
-//     customerEmail: idOrderExists.customerEmail,
-//     customerPhone: idOrderExists.customerPhone,
-//     customerAddress: idOrderExists.customerShippingAddress,
-//   };
-//   // console.log("paymentData", paymentData);
-//   const paymentSession = await initiatePayment(paymentData);
-//   // console.log("paymentdata", paymentData);
-
-//   return paymentSession;
-
-//   // return orders;
-// };
 
 // delete order
 const deleteOrderFromDB = async (
