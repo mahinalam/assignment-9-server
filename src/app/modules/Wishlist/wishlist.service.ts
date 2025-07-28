@@ -44,6 +44,7 @@ const getUsersWishlistsFromDB = async (
       isDeleted: false,
     },
     select: {
+      createdAt: true,
       product: {
         select: {
           id: true,
